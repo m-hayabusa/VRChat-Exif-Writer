@@ -128,7 +128,7 @@ class logReader {
     exec: ChildProcess | undefined;
     reader: rl.Interface | undefined;
 
-    close(){
+    close() {
         this.exec?.kill();
         this.reader?.close();
     }
@@ -147,7 +147,7 @@ class logReader {
         });
 
         this.reader.on("line", (line: string) => {
-            if (line != "") console.log(line);
+            // if (line != "") console.log(line);
             {
                 const match = line.match(/([0-9\.\: ]*) Log        -  \[VRC Camera\] Took screenshot to\: (.*)/);
                 if (match) {
@@ -230,7 +230,7 @@ function main() {
     const waitLoop = setInterval(() => {
         exec("powershell.exe -C \"(Get-Process -Name VRChat | Measure-Object).Count\"", (error, stdout, stderr) => {
             if (parseInt(stdout) >= 1) {
-                if (!running){
+                if (!running) {
                     running = true;
                     console.log("VRChat found");
                     setTimeout(() => {
