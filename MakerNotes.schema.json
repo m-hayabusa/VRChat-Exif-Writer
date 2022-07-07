@@ -1,0 +1,48 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+        "room": {
+            "type": "object",
+            "properties": {
+                "world_id": {
+                    "type": "string",
+                    "pattern": "wrld_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                },
+                "world_name": {
+                    "type": "string"
+                },
+                "permission": {
+                    "type": "string",
+                    "enum": [
+                        "private",
+                        "friends",
+                        "hidden",
+                        "public"
+                    ]
+                },
+                "organizer": {
+                    "type": "string",
+                    "pattern": "usr_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                }
+            },
+            "required": [
+                "world_id",
+                "world_name",
+                "permission"
+            ]
+        },
+        "players": {
+            "type": "array",
+            "items": [
+                {
+                    "type": "string"
+                }
+            ]
+        }
+    },
+    "required": [
+        "room",
+        "players"
+    ]
+}
