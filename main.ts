@@ -83,9 +83,9 @@ let players: string[] = [];
 
 
 class OscServer {
-    
+
     oscServer: Server | undefined;
-    
+
     close() {
         this.oscServer?.close();
     }
@@ -226,6 +226,7 @@ const osc = new OscServer();
 let running = false;
 
 function main() {
+    osc.listen();
     const waitLoop = setInterval(() => {
         exec("powershell.exe -C \"(Get-Process -Name VRChat | Measure-Object).Count\"", (error, stdout, stderr) => {
             if (parseInt(stdout) >= 1) {
@@ -233,13 +234,11 @@ function main() {
                     running = true;
                     console.log("VRChat found");
                     setTimeout(() => {
-                        osc.listen();
                         log.open();
                     }, 1000);
                 }
             } else {
                 running = false;
-                osc.close();
                 log.close();
                 console.log("Waiting for VRChat...");
             }
