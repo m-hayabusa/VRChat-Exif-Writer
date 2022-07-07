@@ -2,6 +2,21 @@ import { Server } from 'node-osc';
 import { execFile, exec, execSync, ChildProcess } from 'child_process';
 import * as rl from "readline";
 
+class Config {
+    static focalMin = 12;
+    static focalMax = 300;
+    static focalDefault = 50;
+
+    static apertureMin = 1;
+    static apertureMax = 22;
+    static apertureDefault = Infinity;
+
+    static exposureRange = 3;
+    static exposureDefault = 0;
+
+    static listenPort = 9001
+}
+
 class MediaTag {
     prefix = "";
     tag: string;
@@ -60,28 +75,22 @@ function writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes) 
 
 
 let isVL2Enabled = false;
-let focalLength = 0;
-let apertureValue = Infinity;
-let exposureIndex = 0;
+let focalLength = Config.focalDefault;
+let apertureValue = Config.apertureDefault;
+let exposureIndex = Config.exposureDefault;
 let roomInfo = new RoomInfo();
 let players: string[] = [];
 
 
 class OscServer {
     
-    focalMin = 12;
-    focalMax = 300;
-    apertureMin = 1;
-    apertureMax = 22;
-    exposureRange = 3;
-
     oscServer: Server | undefined;
     
     close() {
         this.oscServer?.close();
     }
     listen() {
-        this.oscServer = new Server(9001, '0.0.0.0', () => {
+        this.oscServer = new Server(Config.listenPort, '0.0.0.0', () => {
             console.log('OSC Server is listening');
         });
 
@@ -98,18 +107,18 @@ class OscServer {
             }
 
             if (path === "/avatar/parameters/VirtualLens2_Zoom") {
-                if (val >= this.focalMax)
+                if (val === 0)
                     focalLength = Infinity;
                 else
-                    focalLength = this.focalMin * Math.exp(val * Math.log(this.focalMax / this.focalMin));
+                    focalLength = Config.focalMin * Math.exp(val * Math.log(Config.focalMax / Config.focalMin));
             }
 
             if (path === "/avatar/parameters/VirtualLens2_Aperture") {
-                apertureValue = this.apertureMin * Math.exp(val * Math.log(this.apertureMax / this.apertureMin));
+                apertureValue = Config.apertureMin * Math.exp(val * Math.log(Config.apertureMax / Config.apertureMin));
             }
 
             if (path === "/avatar/parameters/VirtualLens2_Exposure") {
-                exposureIndex = (2 * val - 1) * this.exposureRange;
+                exposureIndex = (2 * val - 1) * Config.exposureRange;
             }
         });
     }
@@ -170,6 +179,11 @@ class logReader {
                     roomInfo.permission = match[2] ? match[2] : "public";
                     roomInfo.organizer = match[3];
                     players = [];
+                    focalLength = Config.focalDefault;
+                    apertureValue = Config.apertureDefault;
+                    exposureIndex = Config.exposureDefault;
+                    isVL2Enabled = false;
+
                     // console.log(roomInfo);
                     // console.log(line, match);
                 }
