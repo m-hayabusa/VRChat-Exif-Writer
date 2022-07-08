@@ -7,8 +7,8 @@ class Config {
     static focalMax = 300;
     static focalDefault = 50;
 
-    static apertureMin = 1;
-    static apertureMax = 22;
+    static apertureMin = 22;
+    static apertureMax = 1;
     static apertureDefault = Infinity;
 
     static exposureRange = 3;
