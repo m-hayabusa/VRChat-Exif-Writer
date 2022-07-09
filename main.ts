@@ -72,7 +72,7 @@ function writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes) 
     execFile("./node_modules/exiftool.exe/vendor/exiftool.exe", args).stdout?.on("data", (data: string) => {
         console.log(data);
     });
-    console.log("./node_modules/exiftool.exe/vendor/exiftool.exe" + args.toString());
+    console.log("> exiftool.exe " + args.join(" "));
 }
 
 
@@ -93,7 +93,7 @@ class OscServer {
     }
     listen() {
         this.oscServer = new Server(Config.listenPort, '0.0.0.0', () => {
-            console.log('OSC Server is listening');
+            // console.log('OSC Server is listening');
         });
 
         this.oscServer.on('message', (msg) => {
@@ -201,7 +201,7 @@ class logReader {
                 const match = line.match(/Joining or Creating Room: (.*)/);
                 if (match) {
                     roomInfo.world_name = match[1];
-                    // console.log(roomInfo);
+                    console.log(roomInfo);
                     // console.log(line, match);
                 }
             }
@@ -209,8 +209,8 @@ class logReader {
                 const match = line.match(/OnPlayerJoined (.*)/);
                 if (match) {
                     players.push(match[1]);
-                    console.log(players.toString());
-                    console.log("join", match[1])
+                    // console.log(players.toString());
+                    console.log("join", match[1]);
                     // console.log(line, match);
                 }
             }
@@ -220,9 +220,9 @@ class logReader {
                     const i = players.indexOf(match[1]);
                     if (i !== -1) {
                         players.splice(i, 1);
-                        console.log(players.toString());
+                        // console.log(players.toString());
+                        console.log("quit", match[1]);
                         // console.log(line, match);
-                        console.log("quit", match[1])
                     }
                 }
             }
