@@ -1,5 +1,7 @@
 import { Server } from 'node-osc';
 import { execFile, exec, execSync, ChildProcess } from 'child_process';
+import { Tail } from 'tail';
+import * as fs from 'fs';
 import * as rl from "readline";
 
 class Config {
@@ -127,26 +129,33 @@ class OscServer {
 class logReader {
     exec: ChildProcess | undefined;
     reader: rl.Interface | undefined;
+    tail: Tail | undefined;
+    logFile: string = "";
 
     close() {
         this.exec?.kill();
         this.reader?.close();
     }
 
+    reflesh() {
+        fs.lstat(this.logFile, ()=>{});
+    }
+
     open() {
-        this.exec = exec("powershell.exe -C \"Get-ChildItem ${env:APPDATA}\\..\\LocalLow\\VRChat\\VRChat\\ -Filter output_log_* | Sort-Object LastWriteTime | Select-Object -last 1 | Get-Content -Wait -Tail 0\"");
+        const logDir = `${process.env.APPDATA}\\..\\LocalLow\\VRChat\\VRChat\\`
 
-        const stream = this.exec.stdout;
-        if (!stream) {
-            return;
-        }
+        this.logFile = logDir + (fs.readdirSync(logDir)
+            .filter(e => e.startsWith("output_log_"))
+            .map(e => ({ f: e, t: fs.lstatSync(logDir + e).mtime.getTime() }))
+            .sort((a, b) => b.t - a.t))[0].f;
 
-        stream.setEncoding("utf8");
-        this.reader = rl.createInterface({
-            input: stream,
+        this.tail = new Tail(this.logFile);
+
+        this.tail.on("error", function (error) {
+            console.log('ERROR: ', error);
         });
 
-        this.reader.on("line", (line: string) => {
+        this.tail.on("line", (line: string) => {
             // if (line != "") console.log(line);
             {
                 const match = line.match(/([0-9\.\: ]*) Log        -  \[VRC Camera\] Took screenshot to\: (.*)/);
@@ -221,11 +230,13 @@ class logReader {
     }
 }
 
-const log = new logReader();
-const osc = new OscServer();
-let running = false;
 
 function main() {
+    const log = new logReader();
+    const osc = new OscServer();
+    let running = false;
+    let logReadLoop: NodeJS.Timer | undefined;
+
     osc.listen();
     const waitLoop = setInterval(() => {
         exec("powershell.exe -C \"(Get-Process -Name VRChat | Measure-Object).Count\"", (error, stdout, stderr) => {
@@ -235,11 +246,15 @@ function main() {
                     console.log("VRChat found");
                     setTimeout(() => {
                         log.open();
+                        logReadLoop = setInterval(() => {
+                            log.reflesh();
+                        }, 500);
                     }, 1000);
                 }
             } else {
                 running = false;
                 log.close();
+                clearInterval(logReadLoop);
                 console.log("Waiting for VRChat...");
             }
         });
