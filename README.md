@@ -53,40 +53,18 @@ Node.jsならびにnpmのインストールが必要です。
 ```
 
 ### 自動起動スクリプトの登録
-
-上記の方法ではVRChatを起動する前に毎回`npm run tsc`以降のコマンドを入力する必要があります。  
-これをスクリプトを作成しスタートアップに登録することで自動化します。  
-検索バーにて`ファイル名を指定して実行`と検索し起動します。  
-<img width="280" alt="2022-07-10_15h29_14" src="https://user-images.githubusercontent.com/58413358/178134010-27513814-c45e-41ac-a12b-6d3395034ffa.png">
-  
-起動したら`shell:startup`と入力し`OK`を選択します。  
-<img width="358" alt="2022-07-10_15h40_23" src="https://user-images.githubusercontent.com/58413358/178134233-cb8d2462-ee05-4c86-b7a6-7f3235a46046.png">
-  
-エクスプローラー上部の`表示`→`ファイル名拡張子`のチェックボックスを有効にしてください。  
-
-ファイルエクスプローラーが起動するのでなにもないところで右クリックし、`新規作成`→`テキストドキュメント`を選択してください。  
-<img width="471" alt="image" src="https://user-images.githubusercontent.com/58413358/178134267-2aa8658e-f323-4ffb-9243-ac0a17df42b5.png">
-  
-`新しいテキストドキュメント.txt`というファイルが生成されます。  
-`VRChat-Exif-Writer-startup.bat`と入力し確定してください。  
-<img width="174" alt="image" src="https://user-images.githubusercontent.com/58413358/178134378-dcd79414-d790-4482-a424-3f369643317c.png">
-
-`名前の変更`という確認ダイアログが表示されますが問題ないため`はい(Y)`を選択してください。  
-<img width="286" alt="image" src="https://user-images.githubusercontent.com/58413358/178134411-46326f43-49e6-417f-81bc-ec86f4c03de5.png">
-
-作成した`VRChat-Exif-Writer-startup.bat`を右クリックし、`編集`を選択してください。  
-<img width="195" alt="image" src="https://user-images.githubusercontent.com/58413358/178134472-6061414f-5255-4b72-8094-ceb205e573f8.png">
-
-編集画面が開くため、以下の内容をコピペし保存してください。  
+#### 登録
 ```
-cd %userprofile%\VRChat-Exif-Writer
-npm run tsc
-start /min cmd /c npm run start
+> npm run regist
 ```
-<img width="343" alt="image" src="https://user-images.githubusercontent.com/58413358/178134905-16adbde9-466f-46d1-b1ed-f613857e6013.png">
-
-
-以上で完了です。  
+を実行すると、管理者権限を要求するプロンプトが表示されます。  
+許可すると、ログインした際に自動で起動するようになります。
+#### 削除
+```
+> npm run unregist
+```
+を実行すると、管理者権限を要求するプロンプトが表示されます。  
+許可すると、自動で起動しなくなります。
 
 ## Linuxの場合
 
