@@ -32,7 +32,7 @@ Windows環境のみで動きます (PowerShell.exeが必要)
 ```
 > @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
 > cinst -y git nodejs-lts
-> git clone -b master https://github.com/m-hayabusa/VRChat-Exif-Writer.git
+> git clone -b main https://github.com/m-hayabusa/VRChat-Exif-Writer.git
 > cd VRChat-Exif-Writer
 > npm install
 > npm run tsc
