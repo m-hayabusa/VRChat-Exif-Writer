@@ -1,8 +1,7 @@
 import { Server } from 'node-osc';
-import { execFile, exec, execSync, ChildProcess } from 'child_process';
+import { execFile, exec, ChildProcess } from 'child_process';
 import { Tail } from 'tail';
 import * as fs from 'fs';
-import * as rl from "readline";
 
 class Config {
     static focalMin = 12;
@@ -16,7 +15,7 @@ class Config {
     static exposureRange = 3;
     static exposureDefault = 0;
 
-    static listenPort = 9001
+    static listenPort = 9001;
 }
 
 class MediaTag {
@@ -128,17 +127,15 @@ class OscServer {
 
 class logReader {
     exec: ChildProcess | undefined;
-    reader: rl.Interface | undefined;
     tail: Tail | undefined;
     logFile: string = "";
 
     close() {
         this.exec?.kill();
-        this.reader?.close();
     }
 
     reflesh() {
-        fs.lstat(this.logFile, ()=>{});
+        fs.lstat(this.logFile, () => { });
     }
 
     open() {
@@ -243,7 +240,7 @@ function main() {
             if (parseInt(stdout) >= 1) {
                 if (!running) {
                     running = true;
-                    console.log("VRChat found");
+                    console.log("VRChat: Start");
                     setTimeout(() => {
                         log.open();
                         logReadLoop = setInterval(() => {
