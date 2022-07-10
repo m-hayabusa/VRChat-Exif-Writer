@@ -23,12 +23,12 @@ Windows環境のみで動きます (PowerShell.exeが必要)
 
 # 使い方
 ## Windows 10の場合
-検索バーにて`cmd`と打ち込むと`コマンドプロンプト`というアプリケーションが表示されます。
-これを右クリックして管理者として実行を押してください
+検索バーにて`cmd`と打ち込むと`コマンドプロンプト`というアプリケーションが表示されます。  
+これを右クリックして管理者として実行を押してください  
 <img width="490" alt="2022-07-10_15h20_31" src="https://user-images.githubusercontent.com/58413358/178133832-f2e23fd8-d1ef-47b5-a283-43c9463b9d7c.png">
 
-`>`はコマンドの入力を示す記号です。
-`>`の後から1行づつコピーして貼り付け、上から順に実行してください。
+`>`はコマンドの入力を示す記号です。  
+`>`の後から1行づつコピーして貼り付け、上から順に実行してください。  
 ```
 > @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
 > cinst -y git nodejs-lts
@@ -55,7 +55,8 @@ Windows環境のみで動きます (PowerShell.exeが必要)
 ファイルエクスプローラーが起動するのでなにもないところで右クリックし、`新規作成`→`テキストドキュメント`を選択してください。  
 <img width="471" alt="image" src="https://user-images.githubusercontent.com/58413358/178134267-2aa8658e-f323-4ffb-9243-ac0a17df42b5.png">
   
-`新しいテキストドキュメント.txt`というファイルが生成されるので、`VRChat-Exif-Writer-startup.bat`と入力し確定してください。
+`新しいテキストドキュメント.txt`というファイルが生成されます。  
+`VRChat-Exif-Writer-startup.bat`と入力し確定してください。  
 <img width="174" alt="image" src="https://user-images.githubusercontent.com/58413358/178134378-dcd79414-d790-4482-a424-3f369643317c.png">
 
 `名前の変更`という確認ダイアログが表示されますが問題ないため`はい(Y)`を選択してください。  
@@ -64,7 +65,7 @@ Windows環境のみで動きます (PowerShell.exeが必要)
 作成した`VRChat-Exif-Writer-startup.bat`を右クリックし、`編集`を選択してください。  
 <img width="195" alt="image" src="https://user-images.githubusercontent.com/58413358/178134472-6061414f-5255-4b72-8094-ceb205e573f8.png">
 
-編集画面が開くため、以下の内容をコピペし保存してください。
+編集画面が開くため、以下の内容をコピペし保存してください。  
 ```
 cd %userprofile%\VRChat-Exif-Writer
 npm run tsc
@@ -73,4 +74,4 @@ start /min cmd /c npm run start
 <img width="343" alt="image" src="https://user-images.githubusercontent.com/58413358/178134905-16adbde9-466f-46d1-b1ed-f613857e6013.png">
 
 
-以上で完了です。
+以上で完了です。  
