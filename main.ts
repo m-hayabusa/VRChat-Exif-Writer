@@ -1,8 +1,7 @@
 import { Server } from 'node-osc';
-import { execFile, exec, execSync, ChildProcess } from 'child_process';
+import { execFile, exec, ChildProcess } from 'child_process';
 import { Tail } from 'tail';
 import * as fs from 'fs';
-import * as rl from "readline";
 
 const compatdata_path = process.platform == "win32" ? "" : process.env.STEAM_COMPAT_DATA_PATH == undefined ? `${process.env["HOME"]}/.local/share/Steam/steamapps/compatdata/` : `${process.env.STEAM_COMPAT_DATA_PATH}`
 
@@ -18,7 +17,7 @@ class Config {
     static exposureRange = 3;
     static exposureDefault = 0;
 
-    static listenPort = 9001
+    static listenPort = 9001;
 }
 
 class MediaTag {
@@ -84,7 +83,7 @@ let apertureValue = Config.apertureDefault;
 let exposureIndex = Config.exposureDefault;
 let roomInfo = new RoomInfo();
 let players: string[] = [];
-
+let restart = false;
 
 class OscServer {
 
@@ -130,17 +129,15 @@ class OscServer {
 
 class logReader {
     exec: ChildProcess | undefined;
-    reader: rl.Interface | undefined;
     tail: Tail | undefined;
     logFile: string = "";
 
     close() {
         this.exec?.kill();
-        this.reader?.close();
     }
 
     reflesh() {
-        fs.lstat(this.logFile, ()=>{});
+        fs.lstat(this.logFile, () => { });
     }
 
     open() {
@@ -159,6 +156,13 @@ class logReader {
 
         this.tail.on("line", (line: string) => {
             // if (line != "") console.log(line);
+            {
+                const match = line.match(/VRCApplication: OnApplicationQuit/);
+                if (match) {
+                    console.log("VRChat: Quit");
+                    restart = true;
+                }
+            }
             {
                 const match = line.match(/([0-9\.\: ]*) Log        -  \[VRC Camera\] Took screenshot to\: (.*)/);
                 if (match) {
@@ -244,10 +248,10 @@ function main() {
     osc.listen();
     const waitLoop = setInterval(() => {
         exec(process.platform == "win32" ? "powershell.exe -C \"(Get-Process -Name VRChat | Measure-Object).Count\"" : "ps -A|grep VRChat|wc -l", (error, stdout, stderr) => { 
-            if (parseInt(stdout) >= 1) {
+            if (parseInt(stdout) >= 1 && !restart) {
                 if (!running) {
                     running = true;
-                    console.log("VRChat found");
+                    console.log("VRChat: Start");
                     setTimeout(() => {
                         log.open();
                         logReadLoop = setInterval(() => {
@@ -257,6 +261,7 @@ function main() {
                 }
             } else {
                 running = false;
+                restart = false;
                 log.close();
                 clearInterval(logReadLoop);
                 console.log("Waiting for VRChat...");
