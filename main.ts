@@ -4,6 +4,8 @@ import { Tail } from 'tail';
 import * as fs from 'fs';
 import * as rl from "readline";
 
+const compatdata_path = process.platform == "win32" ? "" : process.env.STEAM_COMPAT_DATA_PATH == undefined ? `${process.env["HOME"]}/.local/share/Steam/steamapps/compatdata/` : `${process.env.STEAM_COMPAT_DATA_PATH}`
+
 class Config {
     static focalMin = 12;
     static focalMax = 300;
@@ -69,10 +71,10 @@ function writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes) 
         args.push(e.toString());
     });
     args.push(`-makernote=${JSON.stringify(makerNotes)}`)
-    execFile("./node_modules/exiftool.exe/vendor/exiftool.exe", args).stdout?.on("data", (data: string) => {
+    execFile(process.platform == "win32" ? "./node_modules/exiftool.exe/vendor/exiftool.exe" : "exiftool", args).stdout?.on("data", (data: string) => {
         console.log(data);
     });
-    console.log("> exiftool.exe " + args.join(" "));
+    console.log("> " + process.platform == "win32" ? "./node_modules/exiftool.exe/vendor/exiftool.exe" : "exiftool" + args.join(" "));
 }
 
 
@@ -142,7 +144,7 @@ class logReader {
     }
 
     open() {
-        const logDir = `${process.env.APPDATA}\\..\\LocalLow\\VRChat\\VRChat\\`
+        const logDir = process.platform === "win32" ? `${process.env.APPDATA}\\..\\LocalLow\\VRChat\\VRChat\\` : `${compatdata_path}/438100/pfx/drive_c/users/steamuser/AppData/LocalLow/VRChat/VRChat/`;
 
         this.logFile = logDir + (fs.readdirSync(logDir)
             .filter(e => e.startsWith("output_log_"))
@@ -161,8 +163,10 @@ class logReader {
                 const match = line.match(/([0-9\.\: ]*) Log        -  \[VRC Camera\] Took screenshot to\: (.*)/);
                 if (match) {
                     const DateTime = match[1].replaceAll('.', ':');
+
+                    const fpath=process.platform == "win32" ? match[2] : match[2].replaceAll('C:\\',(`${compatdata_path}/438100/pfx/drive_c/`)).replaceAll('\\','/');
                     if (isVL2Enabled) {
-                        writeMetadata(match[2], [
+                        writeMetadata(fpath, [
                             new ExifTag("Make", "logilabo"),
                             new ExifTag("Model", "VirtualLens2"),
                             new ExifTag("DateTimeOriginal", DateTime),
@@ -172,7 +176,7 @@ class logReader {
                             new ExifTag("ImageDescription", `at VRChat ${roomInfo.world_name}, with ${players.toString()}`),
                         ], new MakerNotes(roomInfo, players));
                     } else {
-                        writeMetadata(match[2], [
+                        writeMetadata(fpath, [
                             new ExifTag("DateTimeOriginal", DateTime),
                             new ExifTag("ImageDescription", `at VRChat ${roomInfo.world_name}, with ${players.toString()}`),
                         ], new MakerNotes(roomInfo, players));
@@ -239,7 +243,7 @@ function main() {
 
     osc.listen();
     const waitLoop = setInterval(() => {
-        exec("powershell.exe -C \"(Get-Process -Name VRChat | Measure-Object).Count\"", (error, stdout, stderr) => {
+        exec(process.platform == "win32" ? "powershell.exe -C \"(Get-Process -Name VRChat | Measure-Object).Count\"" : "ps -A|grep VRChat|wc -l", (error, stdout, stderr) => { 
             if (parseInt(stdout) >= 1) {
                 if (!running) {
                     running = true;
