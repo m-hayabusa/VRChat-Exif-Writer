@@ -73,7 +73,7 @@ function writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes) 
     execFile(process.platform == "win32" ? "./node_modules/exiftool.exe/vendor/exiftool.exe" : "exiftool", args).stdout?.on("data", (data: string) => {
         console.log(data);
     });
-    console.log("> " + process.platform == "win32" ? "./node_modules/exiftool.exe/vendor/exiftool.exe" : "exiftool" + args.join(" "));
+    console.log("> " + process.platform == "win32" ? "exiftool.exe" : "exiftool" + args.join(" "));
 }
 
 
