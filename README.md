@@ -19,7 +19,19 @@ VirtualLens2が有効な場合はさらに
 * 他の画像まわりのツール (特に、ログファイルを監視しファイルを移動するタイプのもの) とはおそらく干渉します
 * UDP#9001を占有します (OSCメッセージを受信して使うVRC拡張とは共存できません)
 
-Windows環境のみで動きます (PowerShell.exeが必要)
+Windows/Linux環境のみで動きます (Windowsの場合はPowerShell.exeが必要)
+
+# インストール
+
+Node.jsならびにnpmのインストールが必要です。  
+以下よりダウンロード、インストールを行ってください。
+
+[ダウンロード | Node.js](https://nodejs.org/ja/download/)
+
+パッケージマネージャによるインストールも可能です。  
+詳しくは以下を参考にしてください。
+
+[パッケージマネージャを利用した Node.js のインストール | Node.js](https://nodejs.org/ja/download/package-manager/)
 
 # 使い方
 ## Windows 10の場合
@@ -75,3 +87,30 @@ start /min cmd /c npm run start
 
 
 以上で完了です。  
+
+## Linuxの場合
+
+Linux(Steam Deck等)で使用する場合、別途exiftoolのインストールが必要になります。  
+ディストリビューションごとに適切なパッケージをインストールしてください。
+
+```shell
+# Ubuntu
+$ sudo apt install libimage-exiftool-perl
+
+# Arch Linux
+$ sudo pacman -S perl-image-exiftool
+```
+
+Linuxの場合、ターミナルを起動し、以下のコマンドを入力します。  
+(先頭の$は不要です)
+
+```shell
+$ git clone -b main https://github.com/m-hayabusa/VRChat-Exif-Writer.git
+$ cd VRChat-Exif-Writer
+$ npm install
+$ npm run tsc
+$ npm run start
+# Start VRChat
+```
+
+また、VRChatのインストールパスがデフォルトでない場合、別途VRChatインストール先の`compatdata`ディレクトリを環境変数`STEAM_COMPAT_DATA_PATH`に指定する必要があります。
