@@ -2,13 +2,17 @@
   "name": "vrchat-exif-writer",
   "type": "module",
   "version": "0.0.1",
-  "description": "",
+  "description": "add EXIF tag to VRChat Pics.",
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/m-hayabusa/VRChat-Exif-Writer.git"
+  },
   "main": "main.js",
   "scripts": {
     "start": "node main.js",
     "tsc": "tsc"
   },
-  "author": "",
+  "author": "m-hayabusa (https://mewl.me/@mewl)",
   "license": "MIT",
   "dependencies": {
     "exiftool.exe": "^10.53.0",
