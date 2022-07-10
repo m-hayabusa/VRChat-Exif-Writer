@@ -18,8 +18,7 @@ VirtualLens2が有効な場合はさらに
 
 * 他の画像まわりのツール (特に、ログファイルを監視しファイルを移動するタイプのもの) とはおそらく干渉します
 * UDP#9001を占有します (OSCメッセージを受信して使うVRC拡張とは共存できません)
-
-Windows/Linux環境のみで動きます (Windowsの場合はPowerShell.exeが必要)
+* Windows/Linux環境で動きます
 
 # インストール
 
@@ -41,15 +40,21 @@ Node.jsならびにnpmのインストールが必要です。
 
 `>`はコマンドの入力を示す記号です。  
 `>`の後から1行づつコピーして貼り付け、上から順に実行してください。  
-```
+もしくは、#インストール の項目を参照し、Node.jsとGitをインストールしてください。
+```cmd
 > @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
 > cinst -y git nodejs-lts
+> exit
+```
+この操作でNode.jsとGitがインストールされ、コマンドプロンプトが閉じます。
+コマンドプロンプトが閉じたら、もう一度検索バーに`cmd`と入力し、そのままクリックして起動してください。 (*管理者にはしない*)
+```cmd
 > git clone -b main https://github.com/m-hayabusa/VRChat-Exif-Writer.git
 > cd VRChat-Exif-Writer
 > npm install
 > npm run tsc
 > npm run start
-> # Start VRChat
+(このウィンドウはそのまま放置してVRChatを起動する)
 ```
 
 `npm run start`を実行すると以下のような警告が表示される場合があります。  
@@ -96,3 +101,11 @@ $ npm run start
 ```
 
 また、VRChatのインストールパスがデフォルトでない場合、別途VRChatインストール先の`compatdata`ディレクトリを環境変数`STEAM_COMPAT_DATA_PATH`に指定する必要があります。
+
+# 更新
+エクスプローラーでVRChat-Exif-Writerのフォルダを開き、アドレスバーに`cmd`と入力 (もしくは、ターミナルを開いてcloneしたディレクトリへ移動)
+```
+> git pull
+> npm install
+> npm run tsc
+```
