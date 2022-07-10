@@ -22,7 +22,7 @@ VirtualLens2が有効な場合はさらに
 Windows環境のみで動きます (PowerShell.exeが必要)
 
 # 使い方
-## Windows 10の場合
+## Windows 10 & 11の場合
 検索バーにて`cmd`と打ち込むと`コマンドプロンプト`というアプリケーションが表示されます。  
 これを右クリックして管理者として実行を押してください  
 <img width="490" alt="2022-07-10_15h20_31" src="https://user-images.githubusercontent.com/58413358/178133832-f2e23fd8-d1ef-47b5-a283-43c9463b9d7c.png">
@@ -39,6 +39,10 @@ Windows環境のみで動きます (PowerShell.exeが必要)
 > npm run start
 > # Start VRChat
 ```
+
+`npm run start`を実行すると以下のような警告が表示される場合があります。  
+この場合は上の`プライベートネットワーク`と`パブリックネットワーク`両方にチェックボックスを有効にし、`アクセスを許可する`を選択してください。  
+<img width="384" alt="image" src="https://user-images.githubusercontent.com/58413358/178141878-b8037321-8972-42a0-ade0-06d3a145fdf0.png">
 
 ### 自動起動スクリプトの登録
 
