@@ -90,6 +90,17 @@ start /min cmd /c npm run start
 
 ## Linuxの場合
 
+Linux(Steam Deck等)で使用する場合、別途exiftoolのインストールが必要になります。  
+ディストリビューションごとに適切なパッケージをインストールしてください。
+
+```shell
+# Ubuntu
+$ sudo apt install libimage-exiftool-perl
+
+# Arch Linux
+$ sudo pacman -S perl-image-exiftool
+```
+
 Linuxの場合、ターミナルを起動し、以下のコマンドを入力します。  
 (先頭の$は不要です)
 
@@ -100,17 +111,6 @@ $ npm install
 $ npm run tsc
 $ npm run start
 # Start VRChat
-```
-
-Linux(Steam Deck等)で使用する場合、別途exiftoolのインストールが必要になります。  
-ディストリビューションごとに適切なパッケージをインストールしてください。
-
-```shell
-# Ubuntu
-$ sudo apt install libimage-exiftool-perl
-
-# Arch Linux
-$ sudo pacman -S perl-image-exiftool
 ```
 
 また、VRChatのインストールパスがデフォルトでない場合、別途VRChatインストール先の`compatdata`ディレクトリを環境変数`STEAM_COMPAT_DATA_PATH`に指定する必要があります。
