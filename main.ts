@@ -141,7 +141,7 @@ class logReader {
     }
 
     open() {
-        const logDir = process.platform === "win32" ? `${process.env.APPDATA}\\..\\LocalLow\\VRChat\\VRChat\\` : `${compatdata_path}/438100/pfx/drive_c/users/steamuser/AppData/LocalLow/VRChat/VRChat/`;
+        const logDir = process.platform == "win32" ? `${process.env.APPDATA}\\..\\LocalLow\\VRChat\\VRChat\\` : `${compatdata_path}/438100/pfx/drive_c/users/steamuser/AppData/LocalLow/VRChat/VRChat/`;
 
         this.logFile = logDir + (fs.readdirSync(logDir)
             .filter(e => e.startsWith("output_log_"))
