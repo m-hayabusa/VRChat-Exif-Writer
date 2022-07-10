@@ -67,7 +67,7 @@ Windows環境のみで動きます (PowerShell.exeが必要)
 
 編集画面が開くため、以下の内容をコピペし保存してください。  
 ```
-cd %userprofile%\VRChat-Exif-Writer
+cd C:\Windows\System32\VRChat-Exif-Writer
 npm run tsc
 start /min cmd /c npm run start
 ```
