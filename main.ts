@@ -259,6 +259,7 @@ function main() {
 
                     log.open();
                     setInterval(() => {
+                        log.close();
                         log.open();
                     }, 10000);
                 }
