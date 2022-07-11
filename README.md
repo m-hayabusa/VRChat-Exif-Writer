@@ -108,4 +108,5 @@ $ npm run start
 > git pull
 > npm install
 > npm run tsc
+> npm run regist
 ```
