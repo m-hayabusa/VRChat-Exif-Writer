@@ -11,8 +11,8 @@
   "scripts": {
     "start": "node main.js",
     "tsc": "tsc",
-    "unregist": "powershell -C \"Start-Process powershell -Verb runAs -ArgumentList '-C Unregister-ScheduledTask -Confirm:$false -TaskName VRChat-Exif-Writer; sleep -s 1'",
-    "regist": "powershell -C \"Start-Process powershell -Verb runAs -ArgumentList '-C','Register-ScheduledTask','-TaskName','VRChat-Exif-Writer','-TaskPath','nekomimiStudio','-Trigger','$(New-ScheduledTaskTrigger -AtLogOn -User $((Get-WMIObject -class Win32_ComputerSystem).UserName))','-Principal','$(New-ScheduledTaskPrincipal -LogonType S4U -RunLevel Limited -UserId ((Get-WMIObject -class Win32_ComputerSystem).UserName))','-Action',$(Invoke-Expression `'\"'$(New-ScheduledTaskAction -WorkingDirectory '$(Get-Location)' -Execute utils\\service.bat)'`'),'-Force',';sleep','-s 1'"
+    "unregist": "powershell -C \"Start-Process powershell -Verb runAs -ArgumentList @('-ExecutionPolicy','Unrestricted','-C',\"$((Get-Location).Path + '\\utils\\unregist.ps1')\")\"",
+    "regist": "powershell -C \"Start-Process powershell -Verb runAs -ArgumentList @('-ExecutionPolicy','Unrestricted','-C',\"$((Get-Location).Path + '\\utils\\regist.ps1')\")\""
   },
   "author": "m-hayabusa (https://mewl.me/@mewl)",
   "license": "MIT",
