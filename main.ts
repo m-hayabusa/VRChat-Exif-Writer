@@ -1,5 +1,5 @@
 import { Server } from 'node-osc';
-import { execFile, exec, ChildProcess } from 'child_process';
+import { execFile, exec } from 'child_process';
 import { Tail } from 'tail';
 import * as fs from 'fs';
 
@@ -128,12 +128,13 @@ class OscServer {
 }
 
 class logReader {
-    exec: ChildProcess | undefined;
     tail: Tail | undefined;
     logFile: string = "";
+    private logReadLoop: NodeJS.Timer | undefined;
 
     close() {
-        this.exec?.kill();
+        clearInterval(this.logReadLoop);
+        this.tail?.unwatch();
     }
 
     reflesh() {
@@ -141,6 +142,10 @@ class logReader {
     }
 
     open() {
+        this.logReadLoop = setInterval(() => {
+            this.reflesh();
+        }, 500);
+
         const logDir = process.platform == "win32" ? `${process.env.APPDATA}\\..\\LocalLow\\VRChat\\VRChat\\` : `${compatdata_path}/438100/pfx/drive_c/users/steamuser/AppData/LocalLow/VRChat/VRChat/`;
 
         this.logFile = logDir + (fs.readdirSync(logDir)
@@ -168,7 +173,7 @@ class logReader {
                 if (match) {
                     const DateTime = match[1].replaceAll('.', ':');
 
-                    const fpath=process.platform == "win32" ? match[2] : match[2].replaceAll('C:\\',(`${compatdata_path}/438100/pfx/drive_c/`)).replaceAll('\\','/');
+                    const fpath = process.platform == "win32" ? match[2] : match[2].replaceAll('C:\\', (`${compatdata_path}/438100/pfx/drive_c/`)).replaceAll('\\', '/');
                     if (isVL2Enabled) {
                         writeMetadata(fpath, [
                             new ExifTag("Make", "logilabo"),
@@ -243,27 +248,24 @@ function main() {
     const log = new logReader();
     const osc = new OscServer();
     let running = false;
-    let logReadLoop: NodeJS.Timer | undefined;
 
     osc.listen();
     const waitLoop = setInterval(() => {
-        exec(process.platform == "win32" ? "powershell.exe -C \"(Get-Process -Name VRChat | Measure-Object).Count\"" : "ps -A|grep VRChat|wc -l", (error, stdout, stderr) => { 
+        exec(process.platform == "win32" ? "powershell.exe -C \"(Get-Process -Name VRChat | Measure-Object).Count\"" : "ps -A|grep VRChat|wc -l", (error, stdout, stderr) => {
             if (parseInt(stdout) >= 1 && !restart) {
                 if (!running) {
                     running = true;
                     console.log("VRChat: Start");
-                    setTimeout(() => {
+
+                    log.open();
+                    setInterval(() => {
                         log.open();
-                        logReadLoop = setInterval(() => {
-                            log.reflesh();
-                        }, 500);
-                    }, 1000);
+                    }, 10000);
                 }
             } else {
                 running = false;
                 restart = false;
                 log.close();
-                clearInterval(logReadLoop);
                 console.log("Waiting for VRChat...");
             }
         });
