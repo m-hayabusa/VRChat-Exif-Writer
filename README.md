@@ -4,7 +4,7 @@ VRChatのキャプチャ画像にEXIFタグで
 
 * `DateTimeOriginal` 撮影時刻
 * `ImageDescription` ワールド名とそのインスタンスにいたプレイヤー名
-* `MakerNotes` (MakerNotes.schema.jsonを参照)
+* `MakerNotes` (`MakerNotes.schema.json`の構造のJSONをBase64でエンコードしたもの)
 
 を書き込みます
 

@@ -69,7 +69,7 @@ function writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes) 
     data.forEach(e => {
         args.push(e.toString());
     });
-    args.push(`-makernote=${JSON.stringify(makerNotes)}`)
+    args.push(`-makernote=${Buffer.from(JSON.stringify(makerNotes)).toString('base64')}`)
     execFile(process.platform == "win32" ? "./node_modules/exiftool.exe/vendor/exiftool.exe" : "exiftool", args).stdout?.on("data", (data: string) => {
         console.log(data);
     });
