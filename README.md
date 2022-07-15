@@ -1,3 +1,5 @@
+この `OSCproxyHub` ブランチは  https://github.com/m-hayabusa/VRC_OSCproxyHub を実行した状態で起動する必要があります
+
 # VRChat-Exif-Writer
 
 VRChatのキャプチャ画像にEXIFタグで

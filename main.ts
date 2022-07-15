@@ -1,7 +1,9 @@
-import { Server } from 'node-osc';
+import { Client, Message, Server } from 'node-osc';
 import { execFile, exec } from 'child_process';
 import { Tail } from 'tail';
 import * as fs from 'fs';
+import * as dgram from "dgram";
+import * as readline from "readline"
 
 const compatdata_path = process.platform == "win32" ? "" : process.env.STEAM_COMPAT_DATA_PATH == undefined ? `${process.env["HOME"]}/.local/share/Steam/steamapps/compatdata/` : `${process.env.STEAM_COMPAT_DATA_PATH}`
 
@@ -16,8 +18,6 @@ class Config {
 
     static exposureRange = 3;
     static exposureDefault = 0;
-
-    static listenPort = 9001;
 }
 
 class MediaTag {
@@ -76,6 +76,13 @@ function writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes) 
     console.log("> " + process.platform == "win32" ? "exiftool.exe " : "exiftool" + args.join(" "));
 }
 
+function quit() {
+    (new Client("localhost", 9001)).send(new Message("/Hub/unregist", `VRChat_Exif_Writer:${process.pid}`));
+    setTimeout(() => {
+        console.log("quit.");
+        process.exit();
+    }, 100);
+}
 
 let isVL2Enabled = false;
 let focalLength = Config.focalDefault;
@@ -92,14 +99,23 @@ class OscServer {
     close() {
         this.oscServer?.close();
     }
-    listen() {
-        this.oscServer = new Server(Config.listenPort, '0.0.0.0', () => {
+    listen(port:number) {
+        const client = new Client("localhost", 9001);
+        client.send(new Message("/nekomimiStudio/VRChat_Exif_Writer/KILL", process.pid));
+        client.send(new Message("/Hub/regist", `VRChat_Exif_Writer:${process.pid}`, port));
+
+        this.oscServer = new Server(port, '0.0.0.0', () => {
             // console.log('OSC Server is listening');
         });
 
         this.oscServer.on('message', (msg) => {
             const path = msg[0];
             const val = parseFloat(msg[1] as string);
+
+            if (path === "/nekomimiStudio/VRChat_Exif_Writer/KILL") {
+                if (val != process.pid)
+                    quit();
+            }
 
             if (path === "/avatar/parameters/VirtualLens2_Control") {
                 if (val == 193) {
@@ -266,16 +282,29 @@ class logReader {
 function main() {
     const log = new logReader();
     const osc = new OscServer();
+
+    const soc = dgram.createSocket("udp4");
+    soc.bind(0, "localhost")
+    soc.on("listening", () => {
+        const port = soc.address().port;
+        soc.close();
+        console.log(port);
+        osc.listen(port);
+    });
+
     let running = false;
 
-    osc.listen();
     const waitLoop = setInterval(() => {
         exec(process.platform == "win32" ? "powershell.exe -C \"(Get-Process -Name VRChat | Measure-Object).Count\"" : "ps -A|grep VRChat|wc -l", (error, stdout, stderr) => {
             if (parseInt(stdout) >= 1 && !restart) {
                 if (!running) {
                     running = true;
                     console.log("VRChat: Start");
-                    log.open();
+
+                    log.open(true);
+                    setInterval(() => {
+                        log.open(false);
+                    }, 10000);
                 }
             } else {
                 running = false;
@@ -286,5 +315,19 @@ function main() {
         });
     }, 5000);
 }
+
+
+if (process.platform === "win32") {
+    var rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    rl.on("SIGINT", function () {
+        process.emit("SIGINT");
+    });
+}
+
+process.on("SIGINT", quit);
 
 main();
