@@ -131,9 +131,14 @@ class logReader {
     tail: Tail | undefined;
     logFile: string = "";
     private logReadLoop: NodeJS.Timer | undefined;
+    private logReopenLoop: NodeJS.Timer | undefined;
 
     close() {
         clearInterval(this.logReadLoop);
+        clearInterval(this.logReopenLoop);
+        this.logReadLoop = undefined;
+        this.logReopenLoop = undefined;
+        this.logFile = "";
         this.tail?.unwatch();
     }
 
@@ -141,18 +146,32 @@ class logReader {
         fs.lstat(this.logFile, () => { });
     }
 
-    open() {
-        this.logReadLoop = setInterval(() => {
-            this.reflesh();
-        }, 500);
-
+    open(force: boolean = false) {
         const logDir = process.platform == "win32" ? `${process.env.APPDATA}\\..\\LocalLow\\VRChat\\VRChat\\` : `${compatdata_path}/438100/pfx/drive_c/users/steamuser/AppData/LocalLow/VRChat/VRChat/`;
-
-        this.logFile = logDir + (fs.readdirSync(logDir)
+        const logFile = logDir + (fs.readdirSync(logDir)
             .filter(e => e.startsWith("output_log_"))
             .map(e => ({ f: e, t: fs.lstatSync(logDir + e).mtime.getTime() }))
             .sort((a, b) => b.t - a.t))[0].f;
 
+        if (this.logFile === logFile && !force) {
+            return;
+        }
+
+        this.logFile = logFile;
+
+        if (!this.logReopenLoop) {
+            this.logReopenLoop = setInterval(() => {
+                this.open(false);
+            }, 5000);
+        }
+
+        if (!this.logReadLoop) {
+            this.logReadLoop = setInterval(() => {
+                this.reflesh();
+            }, 500);
+        }
+
+        this.tail?.unwatch();
         this.tail = new Tail(this.logFile);
 
         this.tail.on("error", function (error) {
@@ -256,12 +275,7 @@ function main() {
                 if (!running) {
                     running = true;
                     console.log("VRChat: Start");
-
                     log.open();
-                    setInterval(() => {
-                        log.close();
-                        log.open();
-                    }, 10000);
                 }
             } else {
                 running = false;
