@@ -16,6 +16,7 @@ VirtualLens2が有効な場合はさらに
 
 も書き込まれます
 
+* https://github.com/m-hayabusa/picturama/releases を使うとそれらの情報を見れます
 * 他の画像まわりのツール (特に、ログファイルを監視しファイルを移動するタイプのもの) とはおそらく干渉します
 * UDP#9001を占有します (OSCメッセージを受信して使うVRC拡張とは共存できません)
 * Windows/Linux環境で動きます
