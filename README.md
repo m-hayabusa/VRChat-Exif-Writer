@@ -25,7 +25,7 @@ VirtualLens2が有効な場合はさらに
 ## wingetを利用 (推奨) / Windows
 `winget`を使うとNode.JSとGit両方を簡単にインストールすることができます。  
 1. https://www.microsoft.com/p/app-installer/9nblggh4nns1 を開く
-2. <kbd>アプリ インストーラー の取得</kbd> をクリック
+2. <kbd>Microsot Store アプリの取得</kbd> をクリック
 3. 出てきたウィンドウの<kbd>詳細</kbd>をクリック (Win10の場合はこの手順が発生しないようです)
 4. <kbd>インストール</kbd>をクリック、インストールが完了するまで待つ
 5. スタートメニューに `cmd` と入力して<kbd>Enter</kb>
