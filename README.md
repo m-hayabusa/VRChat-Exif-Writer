@@ -21,44 +21,61 @@ VirtualLens2が有効な場合はさらに
 * Windows/Linux環境で動きます
 
 # インストール
+## wingetを利用 (推奨) / Windows
+`winget`を使うとNode.JSとGit両方を簡単にインストールすることができます。  
+1. https://www.microsoft.com/p/app-installer/9nblggh4nns1 を開く
+2. <kbd>アプリ インストーラー の取得</kbd> をクリック
+3. 出てきたウィンドウの<kbd>詳細</kbd>をクリック (Win10の場合はこの手順が発生しないようです)
+4. <kbd>インストール</kbd>をクリック、インストールが完了するまで待つ
+5. スタートメニューに `cmd` と入力して<kbd>Enter</kb>
+6. 出てきたウィンドウに `winget install OpenJS.NodeJS.LTS` と入力、<kbd>Enter</kbd> (Node.JSのインストールが実行されます)
 
-Node.jsならびにnpmのインストールが必要です。  
-以下よりダウンロード、インストールを行ってください。
+6. `C:\Users\hayabusa>` のような表示に戻ったら `winget install Git.Git` と入力、<kbd>Enter</kbd> (Gitのインストールが実行されます)
+7. `exit` と入力して閉じる
 
-[ダウンロード | Node.js](https://nodejs.org/ja/download/)
-
-パッケージマネージャによるインストールも可能です。  
-詳しくは以下を参考にしてください。
-
-[パッケージマネージャを利用した Node.js のインストール | Node.js](https://nodejs.org/ja/download/package-manager/)
-
-# 使い方
-## Windows 10 & 11の場合
+## Chocolateyを利用 / Windows
 検索バーにて`cmd`と打ち込むと`コマンドプロンプト`というアプリケーションが表示されます。  
 これを右クリックして管理者として実行を押してください  
 <img width="490" alt="2022-07-10_15h20_31" src="https://user-images.githubusercontent.com/58413358/178133832-f2e23fd8-d1ef-47b5-a283-43c9463b9d7c.png">
 
-`>`はコマンドの入力を示す記号です。  
-`>`の後から1行づつコピーして貼り付け、上から順に実行してください。  
-もしくは、#インストール の項目を参照し、Node.jsとGitをインストールしてください。
+1行づつコピーして貼り付け、上から順に実行してください。
 ```cmd
-> @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-> cinst -y git nodejs-lts
-> exit
+@"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
+cinst -y git nodejs-lts
+exit
 ```
-この操作でNode.jsとGitがインストールされ、コマンドプロンプトが閉じます。
-コマンドプロンプトが閉じたら、もう一度検索バーに`cmd`と入力し、そのままクリックして起動してください。 (*管理者にはしない*)
+
+## 手動
+### Node.js
+Node.jsならびにnpmのインストールが必要です。  
+以下よりLTS版のダウンロード、インストールを行ってください。
+
+[ダウンロード | Node.js](https://nodejs.org/ja/download/)
+
+### Git
+Gitを使ってダウンロードすると更新がしやすいのでおすすめです。  
+以下よりダウンロード、インストールを行ってください。
+
+[Git for Windows: https://gitforwindows.org/](https://gitforwindows.org/)
+
+Gitをインストールしない場合、右上 Code から Download ZIP し、そのZIPファイルを展開してからフォルダを開いてエクスプローラのアドレスバーに `cmd` と入力、下記 `git clone...` とその下の行を飛ばして3行目から実行してください。
+
+# 使い方
+## Windowsの場合
+#インストール の項目を参照し、Node.jsをインストールしてください。  
+スタートメニューに`cmd`と入力し、<kbd>Enter</kbd>で起動してください。
+表示されたウィンドウに以下を入力してください: 
 ```cmd
-> git clone -b main https://github.com/m-hayabusa/VRChat-Exif-Writer.git
-> cd VRChat-Exif-Writer
-> npm install
-> npm run tsc
-> npm run start
+git clone -b main https://github.com/m-hayabusa/VRChat-Exif-Writer.git
+cd VRChat-Exif-Writer
+npm install
+npm run tsc
+npm run start
 (このウィンドウはそのまま放置してVRChatを起動する)
 ```
 
 `npm run start`を実行すると以下のような警告が表示される場合があります。  
-この場合は上の`プライベートネットワーク`と`パブリックネットワーク`両方にチェックボックスを有効にし、`アクセスを許可する`を選択してください。  
+この場合はそのまま`アクセスを許可する`を選択してください。  
 <img width="384" alt="image" src="https://user-images.githubusercontent.com/58413358/178141878-b8037321-8972-42a0-ade0-06d3a145fdf0.png">
 
 ### 自動起動スクリプトの登録
