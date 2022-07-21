@@ -36,7 +36,7 @@ while (!(Test-CommandExists("winget"))) {
     $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 }
 
-if ([System.Environment]::OSVersion.Version.Major -eq 10) {
+if ([System.Environment]::OSVersion.Version.Build -lt 22000) {
     Write-Host "`n！Windows 10の場合、この後の操作で日本語が表示できず内容が読めなくなる場合があります。`nこのウィンドウのタイトルバーを右クリック → プロパティ → フォント タブ → 中段 フォント からBIZ UDゴシック を選択し、OKを押してください。`n"
     [void]$host.UI.RawUI.ReadKey()
 }
