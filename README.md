@@ -60,8 +60,8 @@ cd VRChat-Exif-Writer
 npm install
 npm run tsc
 npm run start
-(このウィンドウはそのまま放置してVRChatを起動する)
 ```
+(このウィンドウはそのまま放置してVRChatを起動する)
 
 `npm run start`を実行すると以下のような警告が表示される場合があります。  
 この場合はそのまま`アクセスを許可する`を選択してください。  
@@ -97,10 +97,13 @@ $ npm run start
 また、VRChatのインストールパスがデフォルトでない場合、別途VRChatインストール先の`compatdata`ディレクトリを環境変数`STEAM_COMPAT_DATA_PATH`に指定する必要があります。
 
 # 更新
-エクスプローラーでVRChat-Exif-Writerのフォルダを開き、アドレスバーに`cmd`と入力 (もしくは、ターミナルを開いてcloneしたディレクトリへ移動)
+## Windowsの場合
+エクスプローラーでVRChat-Exif-Writerのフォルダを開き、`setup`をダブルクリックし、表示されたウィンドウの内容に従って操作してください。
+
+## Linuxの場合
+VRChat-Exif-Writerのディレクトリで
 ```
-> git pull
-> npm install
-> npm run tsc
-> npm run regist
+$ git pull
+$ npm install
+$ npm run tsc
 ```
