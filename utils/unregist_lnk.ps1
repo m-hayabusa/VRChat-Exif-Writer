@@ -1,0 +1,1 @@
+powershell -C "Start-Process powershell -Verb runAs -ArgumentList @('-ExecutionPolicy','Unrestricted','-C',`"`$((Get-Location).Path + '\utils\unregist.ps1')`")"
