@@ -56,16 +56,15 @@ $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";"
 if (!(Test-Path "$env:LocalAppData\Programs")){
     New-Item -ItemType Directory "$env:LocalAppData\Programs"
 }
-Set-Location "$env:LocalAppData\Programs"
 
-$remote = git remote get-url origin 2>$null
-
-if ($null -eq $remote) {
-    git clone "https://github.com/m-hayabusa/VRChat-Exif-Writer.git"
-    Set-Location VRChat-Exif-Writer
-} else {
+if (Test-Path "$env:LocalAppData\Programs\VRChat-Exif-Writer"){
+    Set-Location "$env:LocalAppData\Programs\VRChat-Exif-Writer"
     Write-Host "çXêVÇµÇ‹Ç∑"
     git pull
+} else {
+    Set-Location "$env:LocalAppData\Programs"
+    git clone "https://github.com/m-hayabusa/VRChat-Exif-Writer.git"
+    Set-Location VRChat-Exif-Writer
 }
 
 npm install
