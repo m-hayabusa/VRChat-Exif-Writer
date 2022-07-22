@@ -28,7 +28,7 @@ VirtualLens2が有効な場合はさらに
 1. スタートメニューに `powershell` と入力して<kbd>Enter</kb>
 2. 以下の1行をコピーし、1.で開いたウィンドウに貼り付ける
 ```
-Invoke-Expression ((Invoke-WebRequest https://raw.githubusercontent.com/m-hayabusa/VRChat-Exif-Writer/add-setup-util/utils/setup.ps1 -UseBasicParsing).Content) 
+Invoke-Expression ((Invoke-WebRequest https://raw.githubusercontent.com/m-hayabusa/VRChat-Exif-Writer/main/utils/setup.ps1 -UseBasicParsing).Content) 
 ```
 3. 表示内容に従って操作する
 4. `セットアップが終了しました。`と出たら、ウィンドウを閉じる
