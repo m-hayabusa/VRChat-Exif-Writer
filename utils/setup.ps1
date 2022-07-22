@@ -89,10 +89,12 @@ if ($null -eq $task) {
         Write-Host "`n後から自動で起動するようにしたくなった場合は、ショートカット「regist」から実行できます。"
     }
 } else {
+    npm run regist
     Write-Host "`n自動起動の解除は、ショートカット「unregist」から実行できます。"
 }
 
 if ($null -ne $task) {
+    Start-Sleep -Seconds 1
     if ($task.State -eq "Running") {
         Write-Host "タスクを再起動します"
         Stop-ScheduledTask -TaskName VRChat-Exif-Writer -TaskPath \nekomimiStudio\
