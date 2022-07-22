@@ -104,7 +104,8 @@ $ npm run start
 
 # 更新
 ## Windowsの場合
-エクスプローラーでVRChat-Exif-Writerのフォルダを開き、`setup`をダブルクリックし、表示されたウィンドウの内容に従って操作してください。
+エクスプローラーでVRChat-Exif-Writerのフォルダを開き、`setup`をダブルクリックし、表示されたウィンドウの内容に従って操作してください。  
+`setup`が見あたらない場合、エクスプローラーのアドレスバーに`git pull`と入力してみてください。
 
 ## Linuxの場合
 VRChat-Exif-Writerのディレクトリで
