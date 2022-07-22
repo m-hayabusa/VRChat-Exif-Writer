@@ -22,31 +22,21 @@ VirtualLens2が有効な場合はさらに
 * Windows/Linux環境で動きます
 
 # インストール
-## wingetを利用 (推奨) / Windows
-`winget`を使うとNode.JSとGit両方を簡単にインストールすることができます。  
-1. https://www.microsoft.com/p/app-installer/9nblggh4nns1 を開く
-2. <kbd>Microsot Store アプリの取得</kbd> をクリック
-3. 出てきたウィンドウの<kbd>詳細</kbd>をクリック (Win10の場合はこの手順が発生しないようです)
-4. <kbd>インストール</kbd>をクリック、インストールが完了するまで待つ
-5. スタートメニューに `cmd` と入力して<kbd>Enter</kb>
-6. 出てきたウィンドウに `winget install OpenJS.NodeJS.LTS` と入力、<kbd>Enter</kbd> (Node.JSのインストールが実行されます)
+## PowerShellスクリプト (推奨) / Windows
+`winget`を利用してNode.JSとGitをインストールした後、`%LocalAppData%\Programs\VRChat-Exif-Writer`にこのアプリケーションを配置するスクリプトです。
 
-6. `C:\Users\hayabusa>` のような表示に戻ったら `winget install Git.Git` と入力、<kbd>Enter</kbd> (Gitのインストールが実行されます)
-7. `exit` と入力して閉じる
-
-## Chocolateyを利用 / Windows
-検索バーにて`cmd`と打ち込むと`コマンドプロンプト`というアプリケーションが表示されます。  
-これを右クリックして管理者として実行を押してください  
-<img width="490" alt="2022-07-10_15h20_31" src="https://user-images.githubusercontent.com/58413358/178133832-f2e23fd8-d1ef-47b5-a283-43c9463b9d7c.png">
-
-1行づつコピーして貼り付け、上から順に実行してください。
-```cmd
-@"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
-cinst -y git nodejs-lts
-exit
+1. スタートメニューに `powershell` と入力して<kbd>Enter</kb>
+2. 以下の1行をコピーし、1.で開いたウィンドウに貼り付ける
 ```
+Invoke-Expression ((Invoke-WebRequest https://raw.githubusercontent.com/m-hayabusa/VRChat-Exif-Writer/add-setup-util/utils/setup.ps1 -UseBasicParsing).Content) 
+```
+3. 表示内容に従って操作する
+4. `セットアップが終了しました。`と出たら、ウィンドウを閉じる
 
-## 手動
+## 手動でセットアップする場合
+Node.jsをインストールしてください。  
+Gitはなくてもセットアップできますが、更新がしやすいので利用することをおすすめします。
+
 ### Node.js
 Node.jsならびにnpmのインストールが必要です。  
 以下よりLTS版のダウンロード、インストールを行ってください。
@@ -61,9 +51,7 @@ Gitを使ってダウンロードすると更新がしやすいのでおすす�
 
 Gitをインストールしない場合、右上 Code から Download ZIP し、そのZIPファイルを展開してからフォルダを開いてエクスプローラのアドレスバーに `cmd` と入力、下記 `git clone...` とその下の行を飛ばして3行目から実行してください。
 
-# 使い方
-## Windowsの場合
-#インストール の項目を参照し、Node.jsをインストールしてください。  
+### VRChat-Exif-Writer
 スタートメニューに`cmd`と入力し、<kbd>Enter</kbd>で起動してください。
 表示されたウィンドウに以下を入力してください: 
 ```cmd
@@ -72,31 +60,25 @@ cd VRChat-Exif-Writer
 npm install
 npm run tsc
 npm run start
-(このウィンドウはそのまま放置してVRChatを起動する)
 ```
+(このウィンドウはそのまま放置してVRChatを起動する)
 
 `npm run start`を実行すると以下のような警告が表示される場合があります。  
 この場合はそのまま`アクセスを許可する`を選択してください。  
 <img width="384" alt="image" src="https://user-images.githubusercontent.com/58413358/178141878-b8037321-8972-42a0-ade0-06d3a145fdf0.png">
-
-### 自動起動スクリプトの登録
-#### 登録
-```
-> npm run regist
-```
-を実行すると、管理者権限を要求するプロンプトが表示されます。  
+#### 自動起動スクリプトの登録
+インストール先のフォルダにあるショートカット `regist` をダブルクリックして開くと、管理者権限を要求するプロンプトが表示されます。  
 許可すると、ログインした際に自動で起動するようになります。
-#### 削除
-```
-> npm run unregist
-```
-を実行すると、管理者権限を要求するプロンプトが表示されます。  
+#### 自動起動スクリプトの削除
+インストール先のフォルダにあるショートカット `unregist` をダブルクリックして開くと、管理者権限を要求するプロンプトが表示されます。  
 許可すると、自動で起動しなくなります。
 
-## Linuxの場合
+## 手動でセットアップする場合 / Linux
+Node.JSとGitをインストールしてください。
 
-Linux(Steam Deck等)で使用する場合、別途exiftoolのインストールが必要になります。  
+Linux(Steam Deck等)で使用する場合、Node.JSに加えて別途exiftoolのインストールが必要になります。  
 ディストリビューションごとに適切なパッケージをインストールしてください。
+Node.JSはバージョン管理ツール(`nvm`や`n`のような)を利用してインストールすることをおすすめします。
 
 ```shell
 # Ubuntu
@@ -121,10 +103,14 @@ $ npm run start
 また、VRChatのインストールパスがデフォルトでない場合、別途VRChatインストール先の`compatdata`ディレクトリを環境変数`STEAM_COMPAT_DATA_PATH`に指定する必要があります。
 
 # 更新
-エクスプローラーでVRChat-Exif-Writerのフォルダを開き、アドレスバーに`cmd`と入力 (もしくは、ターミナルを開いてcloneしたディレクトリへ移動)
+## Windowsの場合
+エクスプローラーでVRChat-Exif-Writerのフォルダを開き、`setup`をダブルクリックし、表示されたウィンドウの内容に従って操作してください。  
+`setup`が見あたらない場合、エクスプローラーのアドレスバーに`git pull`と入力してみてください。
+
+## Linuxの場合
+VRChat-Exif-Writerのディレクトリで
 ```
-> git pull
-> npm install
-> npm run tsc
-> npm run regist
+$ git pull
+$ npm install
+$ npm run tsc
 ```
