@@ -27,17 +27,21 @@ Function New-Shortcut{
     $sc.Save()
 }
 
-while (!(Test-CommandExists("winget"))) {
-    Write-Host "winget コマンドが見つかりません。ストアアプリから アプリ インストーラー を更新してください。`n何かキーを押すと ストアアプリが開きます。`n 開くだけでも更新されるようですが、「入手」や「更新」ボタンが表示されている場合はそれをクリックしてください。"
+if (!(Test-CommandExists("winget"))) {
+    Write-Host "winget コマンドが見つかりません。ストアアプリから アプリ インストーラー を更新してください。`nストアアプリを開くだけでも更新されるようですが、「入手」や「更新」ボタンが表示されている場合はそれをクリックしてください。更新が完了すると、自動で次に進みます。`n何かキーを押すと ストアアプリが開きます。"
     [void]$host.UI.RawUI.ReadKey()
     Start-Process ms-windows-store://pdp?ProductId=9NBLGGH4NNS1
-    Write-Host "インストールが終わったら、何かキーを押すと 次に進みます。"
-    [void]$host.UI.RawUI.ReadKey()
-    $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+    Write-Host -NoNewline "winget コマンドが利用できるようになるのを待っています"
+    while (!(Test-CommandExists("winget"))) {
+        Write-Host -NoNewline "."
+        Start-Sleep -Seconds 1
+        $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+    }
+    Write-Host "`nwinget コマンドが利用できるようになりました。"
 }
 
 if ([System.Environment]::OSVersion.Version.Build -lt 22000) {
-    Write-Host "`n！Windows 10の場合、この後の操作で日本語が表示できず内容が読めなくなる場合があります。`nこのウィンドウのタイトルバーを右クリック → プロパティ → フォント タブ → 中段 フォント からBIZ UDゴシック を選択し、OKを押してください。`n"
+    Write-Host "`n！Windows 10の場合、この後の操作で日本語が表示できず内容が読めなくなる場合があります。`nこのウィンドウのタイトルバーを右クリック → プロパティ → フォント タブ → 中段 フォント からBIZ UDゴシック を選択し、OKを押してください。`n何かキーを押すと 次に進みます。"
     [void]$host.UI.RawUI.ReadKey()
 }
 
@@ -53,18 +57,23 @@ if (!(Test-CommandExists("git"))) {
 
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 
-if (!(Test-Path "$env:LocalAppData\Programs")){
-    New-Item -ItemType Directory "$env:LocalAppData\Programs"
-}
-
-if (Test-Path "$env:LocalAppData\Programs\VRChat-Exif-Writer"){
-    Set-Location "$env:LocalAppData\Programs\VRChat-Exif-Writer"
+$remote = git remote get-url origin 2>$null
+if ("https://github.com/m-hayabusa/VRChat-Exif-Writer.git" -eq $remote) {
     Write-Host "更新します"
     git pull
 } else {
-    Set-Location "$env:LocalAppData\Programs"
-    git clone "https://github.com/m-hayabusa/VRChat-Exif-Writer.git"
-    Set-Location VRChat-Exif-Writer
+    if (Test-Path "$env:LocalAppData\Programs\VRChat-Exif-Writer"){
+        Set-Location "$env:LocalAppData\Programs\VRChat-Exif-Writer"
+        Write-Host "更新します"
+        git pull
+    } else {
+        if (!(Test-Path "$env:LocalAppData\Programs")){
+            New-Item -ItemType Directory "$env:LocalAppData\Programs"
+        }
+        Set-Location "$env:LocalAppData\Programs"
+        git clone "https://github.com/m-hayabusa/VRChat-Exif-Writer.git"
+        Set-Location VRChat-Exif-Writer
+    }
 }
 
 npm install
