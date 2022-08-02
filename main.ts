@@ -220,7 +220,7 @@ class logReader {
                 }
             }
             {
-                const match = line.match(/.*\[Behaviour\] Joining (wrld_.*?):.*?~(?:(private|friends|hidden)\((.*?)\))?/);
+                const match = line.match(/.*\[Behaviour\] Joining (wrld_.*?):(?:.*?(private|friends|hidden)\((.*?)\))?/);
                 if (match) {
                     roomInfo = new RoomInfo();
                     roomInfo.world_id = match[1];
