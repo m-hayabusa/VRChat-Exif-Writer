@@ -8,7 +8,7 @@ if ( $null -eq $task ) {
         Write-Host "タスクを再起動します"
         Stop-ScheduledTask -TaskName VRChat-Exif-Writer -TaskPath \nekomimiStudio\
     }
-    Write-Host "タスクを再起動します"
+    Write-Host "タスクを起動しています"
     Start-ScheduledTask -TaskName VRChat-Exif-Writer -TaskPath \nekomimiStudio\
 }
 
