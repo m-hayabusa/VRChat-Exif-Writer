@@ -84,6 +84,7 @@ if ($null -eq $task) {
     Write-Host "`n自動起動するように登録しますか？`nEnterで実行 / それ以外でスキップ"
     if ($host.UI.RawUI.ReadKey().VirtualKeyCode -eq ([ConsoleKey]::Enter).value__) {
         npm run regist
+        New-Shortcut -Destinaton "$startmenuPath\VRChat-Exif-Writer\VRChat-Exif-Writerを停止.lnk" -Target $(Get-Command powershell.exe) -Arguments "$env:LocalAppData\Programs\VRChat-Exif-Writer\utils\stop.ps1" -Workdir "$env:LocalAppData\Programs\VRChat-Exif-Writer"
         Write-Host "`n自動起動の解除は、ショートカット「unregist」から実行できます。"
     } else {
         Write-Host "`n後から自動で起動するようにしたくなった場合は、ショートカット「regist」から実行できます。"
