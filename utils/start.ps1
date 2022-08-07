@@ -11,3 +11,5 @@ if ( $null -eq $task ) {
     Write-Host "タスクを起動しています"
     Start-ScheduledTask -TaskName VRChat-Exif-Writer -TaskPath \nekomimiStudio\
 }
+
+Start-Sleep -Seconds 1
