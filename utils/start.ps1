@@ -1,13 +1,15 @@
 $task = $(Get-ScheduledTask -TaskName VRChat-Exif-Writer -TaskPath \nekomimiStudio\ 2>$null)
 
 if ( $null -eq $task ) {
-    Write-Host "’¼Ú‹N“®‚µ‚Ü‚·"
+    Write-Host "ï¿½ï¿½ï¿½Ú‹Nï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½"
     npm run start
 } else {
     if ($task.State -eq "Running") {
-        Write-Host "ƒ^ƒXƒN‚ğÄ‹N“®‚µ‚Ü‚·"
+        Write-Host "ï¿½^ï¿½Xï¿½Nï¿½ï¿½ï¿½Ä‹Nï¿½ï¿½ï¿½ï¿½ï¿½Ü‚ï¿½"
         Stop-ScheduledTask -TaskName VRChat-Exif-Writer -TaskPath \nekomimiStudio\
     }
-    Write-Host "ƒ^ƒXƒN‚ğ‹N“®‚µ‚Ä‚¢‚Ü‚·"
+    Write-Host "ï¿½^ï¿½Xï¿½Nï¿½ï¿½ï¿½Nï¿½ï¿½ï¿½ï¿½ï¿½Ä‚ï¿½ï¿½Ü‚ï¿½"
     Start-ScheduledTask -TaskName VRChat-Exif-Writer -TaskPath \nekomimiStudio\
 }
+
+Start-Sleep -Seconds 1

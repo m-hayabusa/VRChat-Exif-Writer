@@ -8,3 +8,5 @@ if ( $null -eq $task ) {
 } else {
     Write-Host "タスクが起動していません"
 }
+
+Start-Sleep -Seconds 1
