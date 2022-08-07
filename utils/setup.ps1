@@ -76,20 +76,26 @@ if ("https://github.com/m-hayabusa/VRChat-Exif-Writer.git" -eq $remote) {
     }
 }
 
+$targetDir = Get-Location
+
 npm install
 npm run tsc
+
+$isAutoStart = $false
 
 $task = Get-ScheduledTask -TaskName VRChat-Exif-Writer -TaskPath \nekomimiStudio\ 2>$null
 if ($null -eq $task) {
     Write-Host "`n自動起動するように登録しますか？`nEnterで実行 / それ以外でスキップ"
     if ($host.UI.RawUI.ReadKey().VirtualKeyCode -eq ([ConsoleKey]::Enter).value__) {
-        npm run regist
-        New-Shortcut -Destinaton "$startmenuPath\VRChat-Exif-Writer\VRChat-Exif-Writerを停止.lnk" -Target $(Get-Command powershell.exe) -Arguments "$env:LocalAppData\Programs\VRChat-Exif-Writer\utils\stop.ps1" -Workdir "$env:LocalAppData\Programs\VRChat-Exif-Writer"
-        Write-Host "`n自動起動の解除は、ショートカット「unregist」から実行できます。"
+        $isAutoStart = $true
     } else {
         Write-Host "`n後から自動で起動するようにしたくなった場合は、ショートカット「regist」から実行できます。"
     }
 } else {
+    $isAutoStart = $true
+}
+
+if ($isAutoStart) {
     npm run regist
     Write-Host "`n自動起動の解除は、ショートカット「unregist」から実行できます。"
 }
@@ -112,8 +118,11 @@ if (!(Test-Path "$startmenuPath\VRChat-Exif-Writer")){
     New-Item -ItemType Directory "$startmenuPath\VRChat-Exif-Writer"
 }
 
-New-Shortcut -Destinaton "$startmenuPath\VRChat-Exif-Writer\VRChat-Exif-Writer.lnk" -Target $(Get-Command powershell.exe) -Arguments "$env:LocalAppData\Programs\VRChat-Exif-Writer\utils\start.ps1" -Workdir "$env:LocalAppData\Programs\VRChat-Exif-Writer"
-New-Shortcut -Destinaton "$startmenuPath\VRChat-Exif-Writer\VRChat-Exif-Writerのフォルダを開く.lnk" -Target "C:\Windows\explorer.exe" -Arguments "$env:LocalAppData\Programs\VRChat-Exif-Writer\"
+New-Shortcut -Destinaton "$startmenuPath\VRChat-Exif-Writer\VRChat-Exif-Writer.lnk" -Target $(Get-Command powershell.exe) -Arguments "$targetDir\utils\start.ps1" -Workdir "$targetDir"
+New-Shortcut -Destinaton "$startmenuPath\VRChat-Exif-Writer\VRChat-Exif-Writerのフォルダを開く.lnk" -Target "C:\Windows\explorer.exe" -Arguments "$targetDir\"
+if ($isAutoStart) {
+    New-Shortcut -Destinaton "$startmenuPath\VRChat-Exif-Writer\VRChat-Exif-Writerを停止.lnk" -Target $(Get-Command powershell.exe) -Arguments "$targetDir\utils\stop.ps1" -Workdir "$targetDir"
+}
 
 Write-Host "`nインストールされたフォルダは スタートメニュー「VRChat-Exif-Writerのフォルダを開く」から開くことができます。"
 Write-Host "セットアップが終了しました。`n更新は、ショートカット「setup」から実行できます。"
