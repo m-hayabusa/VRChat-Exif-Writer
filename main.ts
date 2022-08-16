@@ -139,6 +139,13 @@ class OscServer {
             if (path === "/avatar/parameters/VirtualLens2_Exposure") {
                 exposureIndex = (2 * val - 1) * Config.exposureRange;
             }
+
+            if (path === "/avatar/change") {
+                focalLength = Config.focalDefault;
+                apertureValue = Config.apertureDefault;
+                exposureIndex = Config.exposureDefault;
+                isVL2Enabled = false;
+            }
         });
     }
 }
@@ -195,7 +202,7 @@ class logReader {
         });
 
         this.tail.on("line", (line: string) => {
-            // if (line != "") console.log(line);
+            if (line != "") console.log(line);
             {
                 const match = line.match(/VRCApplication: OnApplicationQuit/);
                 if (match) {
@@ -229,7 +236,7 @@ class logReader {
                 }
             }
             {
-                const match = line.match(/.*\[Behaviour\] Joining (wrld_.*?):.*?~(?:(private|friends|hidden)\((.*?)\))?/);
+                const match = line.match(/.*\[Behaviour\] Joining (wrld_.*?):(?:.*?(private|friends|hidden)\((.*?)\))?/);
                 if (match) {
                     roomInfo = new RoomInfo();
                     roomInfo.world_id = match[1];
