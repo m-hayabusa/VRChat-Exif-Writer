@@ -125,6 +125,10 @@ if ($isAutoStart) {
 }
 
 Write-Host "`nインストールされたフォルダは スタートメニュー「VRChat-Exif-Writerのフォルダを開く」から開くことができます。"
+
+Write-Host "`nWindows FirewallにNode.jsを追加します`n このアプリの機能のいくつかが Windows Defender ファイヤウォールでブロックされています というウィンドウが出てきた場合、 プライベート ネットワーク を選択して (デフォルトで選択されているはずです) アクセスを許可する をクリックしてください。"
+node .\utils\firewall-request.js
+
 Write-Host "セットアップが終了しました。`n更新は、ショートカット「setup」から実行できます。"
 
 if($null -eq $task) {
