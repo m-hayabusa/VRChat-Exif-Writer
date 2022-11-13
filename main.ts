@@ -3,6 +3,9 @@ import { execFile, exec } from 'child_process';
 import { Tail } from 'tail';
 import * as fs from 'fs';
 import os from 'os';
+import nodeNotifier from 'node-notifier';
+import * as http from "http";
+import { AddressInfo } from 'net';
 
 const compatdata_path = process.platform == "win32" ? "" : process.env.STEAM_COMPAT_DATA_PATH == undefined ? `${process.env["HOME"]}/.local/share/Steam/steamapps/compatdata/` : `${process.env.STEAM_COMPAT_DATA_PATH}`
 
@@ -191,7 +194,28 @@ class logReader {
         });
 
         this.tail.on("line", (line: string) => {
-            if (line != "") console.log(line);
+            // if (line != "") console.log(line);
+            {
+                const match = line.match(/\[Video Playback\] Attempting to resolve URL 'http:\/\/localhost\/Temporary_Listen_Addresses\/openURL\/(.*)'/);
+                if (match) {
+                    console.log("OpenURL", match[1]);
+
+                    let url = match[1];
+                    if (!match[1].match(/^https?:\/\/(.+\.)?(vrchat\.com|vrch\.at|booth\.pm|gumroad\.com|twitter\.com|vroid\.com)(\/|\?|$)/i)) {
+                        url = `http://localhost:${(httpServer.address() as AddressInfo).port}?world_id=${roomInfo.world_id}&world_name=${encodeURIComponent(`${roomInfo.world_name}`)}&url=${encodeURIComponent(match[1])}`;
+                    }
+
+                    exec(process.platform == "win32" ? `start ${url.replaceAll(/([&\|<>\(\)\"])/g, "^$1")}` : `xdg-open "${url}"`);
+                    nodeNotifier.notify(
+                        {
+                            title: "VRChat Link Opener",
+                            message: `Opened ${match[1]} by ${roomInfo.world_name}`,
+                            sound: true,
+                            wait: false,
+                        }
+                    );
+                }
+            }
             {
                 const match = line.match(/VRCApplication: OnApplicationQuit/);
                 if (match) {
@@ -288,6 +312,11 @@ class logReader {
     }
 }
 
+const htmlResBody = fs.readFileSync("./cushion.html", { encoding: "utf8" });
+const httpServer = http.createServer((req, res) => {
+    res.writeHead(200, { "Content-Type": "text/html" });
+    res.end(htmlResBody);
+});
 
 function main() {
     if (fs.statSync(`${os.tmpdir()}/VRChat-Exif-Writer.pid`, { throwIfNoEntry: false })) {
@@ -305,6 +334,8 @@ function main() {
     let running = false;
 
     osc.listen();
+    httpServer.listen();
+
     const waitLoop = setInterval(() => {
         exec(process.platform == "win32" ? "powershell.exe -C \"(Get-Process -Name VRChat | Measure-Object).Count\"" : "ps -A|grep VRChat|wc -l", (error, stdout, stderr) => {
             if (parseInt(stdout) >= 1 && !restart) {

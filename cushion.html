@@ -1,0 +1,81 @@
+<meta charset="UTF-8">
+<style>
+    a {
+        color: #2aa198;
+    }
+
+    .path {
+        color: #93a1a1;
+        font-size: 0.7em;
+    }
+
+    .protocol,
+    .param {
+        color: #586e75;
+        font-size: 0.7em;
+    }
+
+    .param {
+        font-style: italic;
+    }
+
+    .host {
+        color: #268bd2;
+        font-weight: bold;
+    }
+
+    body {
+        background: #002b36;
+        color: #586e75;
+        text-align: center;
+        font-size: 1.5em;
+    }
+
+    button {
+        font-family: monospace;
+        background: #073642;
+        border: unset;
+        border-style: solid;
+        border-radius: 1em;
+        border-color: #268bd2;
+        border-width: .2em;
+        cursor: pointer;
+        padding: 0 1em;
+        margin: 0.5em;
+        font-size: 1.5em;
+        max-width: 80vw;
+        overflow-wrap: anywhere;
+    }
+</style>
+<p>
+    あなたが <a id="worldLink">どこかのワールド</a> にいるとき、<br>
+    <a id="link" referrerpolicy="no-referrer"><button>何か</button></a><br>
+    を開くことが要求されました
+    <script>
+        function tryDecode(input) {
+            try {
+                return decodeURIComponent(input);
+            } catch (e) {
+                return input;
+            }
+        }
+        const url = new URL(document.location);
+        const target = url.searchParams.get("url");
+        if (target != "") {
+            document.getElementById("link").href = url.searchParams.get("url");
+            const targetUrl = new URL(target);
+            let preview = "<span class='protocol'>" + targetUrl.protocol + "//</span>";
+            preview += "<span class='host'>" + targetUrl.host + "</span>";
+            if (targetUrl.port) preview += "<span class='port'>:" + targetUrl.port + "</span>";
+            if (targetUrl.pathname) preview += "<span class='path'>" + tryDecode(targetUrl.pathname) + "</span>";
+            if (targetUrl.search) preview += "<span class='param'>" + tryDecode(targetUrl.search) + "</span>";
+            document.getElementById("link").children[0].innerHTML = preview;
+        }
+
+        const world_name = url.searchParams.get("world_name");
+        if (world_name) document.getElementById("worldLink").innerText = world_name;
+
+        const world_id = url.searchParams.get("world_id");
+        if (world_id != "") document.getElementById("worldLink").href = "https://vrchat.com/home/launch?worldId=" + world_id;
+    </script>
+</p>
