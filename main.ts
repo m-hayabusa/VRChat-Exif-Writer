@@ -42,6 +42,10 @@ class XmpTag extends MediaTag {
     prefix: string = "-xmp";
 }
 
+class PngTag extends MediaTag {
+    prefix: string = "-png";
+}
+
 class RoomInfo {
     world_id: string | undefined;
     world_name: string | undefined;
@@ -201,22 +205,36 @@ class logReader {
                     const DateTime = match[1].replaceAll('.', ':');
 
                     const fpath = process.platform == "win32" ? match[2] : match[2].replaceAll('C:\\', (`${compatdata_path}/438100/pfx/drive_c/`)).replaceAll('\\', '/');
+
+                    const tag: Array<MediaTag> = [];
+
+                    tag.push(new ExifTag("DateTimeOriginal", DateTime));
+                    tag.push(new ExifTag("ImageDescription", `at VRChat ${roomInfo.world_name}, with ${players.toString()}`));
+                    tag.push(new XmpTag("DateTimeOriginal", DateTime));
+                    tag.push(new XmpTag("ImageDescription", `at VRChat ${roomInfo.world_name}, with ${players.toString()}`));
+                    tag.push(new PngTag("Description", `at VRChat ${roomInfo.world_name}, with ${players.toString()}`));
+                    tag.push(new PngTag("CreationTime", DateTime));
+
                     if (isVL2Enabled) {
-                        writeMetadata(fpath, [
-                            new ExifTag("Make", "logilabo"),
-                            new ExifTag("Model", "VirtualLens2"),
-                            new ExifTag("DateTimeOriginal", DateTime),
-                            new ExifTag("FocalLength", focalLength.toFixed(1)),
-                            new ExifTag("FNumber", apertureValue.toFixed(1)),
-                            new ExifTag("ExposureIndex", exposureIndex.toFixed(1)),
-                            new ExifTag("ImageDescription", `at VRChat ${roomInfo.world_name}, with ${players.toString()}`),
-                        ], new MakerNotes(roomInfo, players));
-                    } else {
-                        writeMetadata(fpath, [
-                            new ExifTag("DateTimeOriginal", DateTime),
-                            new ExifTag("ImageDescription", `at VRChat ${roomInfo.world_name}, with ${players.toString()}`),
-                        ], new MakerNotes(roomInfo, players));
+                        tag.push(new ExifTag("Make", "logilabo"));
+                        tag.push(new ExifTag("Model", "VirtualLens2"));
+                        tag.push(new ExifTag("DateTimeOriginal", DateTime));
+                        tag.push(new ExifTag("FocalLength", focalLength.toFixed(1)));
+                        tag.push(new ExifTag("FNumber", apertureValue.toFixed(1)));
+                        tag.push(new ExifTag("ExposureIndex", exposureIndex.toFixed(1)));
+                        tag.push(new ExifTag("ImageDescription", `at VRChat ${roomInfo.world_name}, with ${players.toString()}`));
+                        tag.push(new XmpTag("Make", "logilabo"));
+                        tag.push(new XmpTag("Model", "VirtualLens2"));
+                        tag.push(new XmpTag("DateTimeOriginal", DateTime));
+                        tag.push(new XmpTag("FocalLength", focalLength.toFixed(1)));
+                        tag.push(new XmpTag("FNumber", apertureValue.toFixed(1)));
+                        tag.push(new XmpTag("ExposureIndex", focalLength.toFixed(1)));
+                        tag.push(new XmpTag("ImageDescription", `at VRChat ${roomInfo.world_name}, with ${players.toString()}`));
+                        tag.push(new PngTag("Description", `at VRChat ${roomInfo.world_name}, with ${players.toString()}`));
+                        tag.push(new PngTag("Make", "logilabo"));
+                        tag.push(new PngTag("Model", "VirtualLens2"));
                     }
+                    writeMetadata(fpath, tag, new MakerNotes(roomInfo, players));
                     // console.log(line, match);
                 }
             }
