@@ -196,6 +196,9 @@ class logReader {
                 const match = line.match(/VRCApplication: OnApplicationQuit/);
                 if (match) {
                     console.log("VRChat: Quit");
+                    exec("pwsh.exe -C \".\\utils\\write-timestamp.ps1 -Pathes @('C:\\Program Files (x86)\\Steam\\userdata\\308230826\\760\\remote\\438100\\screenshots', '${env:USERPROFILE}\\Amazon Drive\\Pictures\\Quest') -DestPath 'D:\\VRCImage\'\"").stdout?.on("data", (data: string) => {
+                        if (data != "") console.log("  " + data);
+                    });
                     restart = true;
                 }
             }
