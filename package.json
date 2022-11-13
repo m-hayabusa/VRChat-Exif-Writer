@@ -18,12 +18,14 @@
   "license": "MIT",
   "dependencies": {
     "exiftool.exe": "^10.53.0",
+    "node-notifier": "^10.0.1",
     "node-osc": "^8.0.3",
     "tail": "^2.2.4",
     "typescript": "^4.7.4"
   },
   "devDependencies": {
     "@types/node": "^18.0.3",
+    "@types/node-notifier": "^8.0.2",
     "@types/node-osc": "^6.0.0",
     "@types/tail": "^2.2.1"
   }
