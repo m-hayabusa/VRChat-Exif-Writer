@@ -2,6 +2,7 @@ import { Server } from 'node-osc';
 import { execFile, exec } from 'child_process';
 import { Tail } from 'tail';
 import * as fs from 'fs';
+import os from 'os';
 
 const compatdata_path = process.platform == "win32" ? "" : process.env.STEAM_COMPAT_DATA_PATH == undefined ? `${process.env["HOME"]}/.local/share/Steam/steamapps/compatdata/` : `${process.env.STEAM_COMPAT_DATA_PATH}`
 
@@ -271,6 +272,16 @@ class logReader {
 
 
 function main() {
+    if (fs.statSync(`${os.tmpdir()}/VRChat-Exif-Writer.pid`, { throwIfNoEntry: false })) {
+        const pid = parseInt(fs.readFileSync(`${os.tmpdir()}/VRChat-Exif-Writer.pid`).toString());
+        exec(process.platform == "win32" ? `powershell.exe -C \"Get-Process -Id ${pid}\"` : `ps --no-headers -p ${pid}`, (error, stdout, stderr) => {
+            if (error?.code != 1) {
+                throw new Error("Found Another Process");
+            }
+        });
+    }
+    fs.writeFile(`${os.tmpdir()}/VRChat-Exif-Writer.pid`, process.pid.toString(), () => { });
+
     const log = new logReader();
     const osc = new OscServer();
     let running = false;
