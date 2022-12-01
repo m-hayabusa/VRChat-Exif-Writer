@@ -18,12 +18,13 @@
                         "private",
                         "friends",
                         "hidden",
+                        "group",
                         "public"
                     ]
                 },
                 "organizer": {
                     "type": "string",
-                    "pattern": "usr_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+                    "pattern": "(usr|grp)_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
                 }
             },
             "required": [
