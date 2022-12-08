@@ -239,11 +239,11 @@ class logReader {
                 }
             }
             {
-                const match = line.match(/.*\[Behaviour\] Joining (wrld_.*?):(?:.*?(private|friends|hidden|group)\((.*?)\))?/);
+                const match = line.match(/.*\[Behaviour\] Joining (wrld_.*?):(?:.*?(private|friends|hidden|group)\((.*?)\))?(~canRequestInvite)?/);
                 if (match) {
                     roomInfo = new RoomInfo();
                     roomInfo.world_id = match[1];
-                    roomInfo.permission = match[2] ? match[2] : "public";
+                    roomInfo.permission = (match[2] ? match[2] : "public") + (match[4] ? "+" : "");
                     roomInfo.organizer = match[3];
                     players = [];
                     focalLength = Config.focalDefault;
