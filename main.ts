@@ -78,7 +78,7 @@ function writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes) 
         args.push(e.toString());
     });
     args.push(`-makernote=${Buffer.from(JSON.stringify(makerNotes)).toString('base64')}`)
-    execFile(process.platform == "win32" ? "./node_modules/exiftool.exe/vendor/exiftool.exe" : "exiftool", args).stdout?.on("data", (data: string) => {
+    execFile(process.platform == "win32" ? "./node_modules/exiftool-vendored.exe/bin/exiftool.exe" : "exiftool", args).stdout?.on("data", (data: string) => {
         console.log(data);
     });
     console.log("> " + process.platform == "win32" ? "exiftool.exe " : "exiftool" + args.join(" "));
@@ -266,11 +266,11 @@ class logReader {
                 }
             }
             {
-                const match = line.match(/.*\[Behaviour\] Joining (wrld_.*?):(?:.*?(private|friends|hidden|group)\((.*?)\))?/);
+                const match = line.match(/.*\[Behaviour\] Joining (wrld_.*?):(?:.*?(private|friends|hidden|group)\((.*?)\))?(~canRequestInvite)?/);
                 if (match) {
                     roomInfo = new RoomInfo();
                     roomInfo.world_id = match[1];
-                    roomInfo.permission = match[2] ? match[2] : "public";
+                    roomInfo.permission = (match[2] ? match[2] : "public") + (match[4] ? "+" : "");
                     roomInfo.organizer = match[3];
                     players = [];
                     focalLength = Config.focalDefault;
