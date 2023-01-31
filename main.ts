@@ -1,11 +1,13 @@
 import { Server } from 'node-osc';
 import { execFile, exec } from 'child_process';
 import { Tail } from 'tail';
+import sharp from 'sharp';
 import * as fs from 'fs';
 import os from 'os';
 import nodeNotifier from 'node-notifier';
 import * as http from "http";
 import { AddressInfo } from 'net';
+import path from 'path';
 
 const compatdata_path = process.platform == "win32" ? "" : process.env.STEAM_COMPAT_DATA_PATH == undefined ? `${process.env["HOME"]}/.local/share/Steam/steamapps/compatdata/` : `${process.env.STEAM_COMPAT_DATA_PATH}`
 
@@ -31,6 +33,9 @@ class Config {
         this.exposureDefault = configFile?.exposureDefault ? configFile.exposureDefault : 0;
 
         this.listenPort = configFile?.listenPort ? configFile.listenPort : 9001;
+        this.destDir = configFile?.destDir ? configFile?.destDir : "";
+        this.compressFormat = configFile?.compressFormat ? configFile?.compressFormat : "";
+        this.compressOptions = configFile?.compressOptions ? configFile?.compressOptions : {};
 
         fs.writeFileSync("./config.json", JSON.stringify(this, undefined, "    "));
     }
@@ -47,6 +52,10 @@ class Config {
     exposureDefault: number;
 
     listenPort: number;
+
+    destDir: string;
+    compressFormat: keyof sharp.FormatEnum | "";
+    compressOptions: sharp.OutputOptions | sharp.JpegOptions | sharp.PngOptions | sharp.WebpOptions | sharp.AvifOptions | sharp.HeifOptions | sharp.JxlOptions | sharp.GifOptions | sharp.Jp2Options | sharp.TiffOptions;
 }
 
 const config = new Config()
@@ -99,18 +108,41 @@ class MakerNotes {
     }
 }
 
-function writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes) {
-    let args = ["-charset", "utf8", "-overwrite_original", file];
-    data.forEach(e => {
-        args.push(e.toString());
+async function writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes) {
+    return new Promise((res, rej) => {
+        let args = ["-charset", "utf8", "-overwrite_original", file];
+        data.forEach(e => {
+            args.push(e.toString());
+        });
+        args.push(`-makernote=${Buffer.from(JSON.stringify(makerNotes)).toString('base64')}`)
+        const result = execFile(process.platform == "win32" ? "./node_modules/exiftool-vendored.exe/bin/exiftool.exe" : "exiftool", args).stdout;
+        result?.on("data", (data: string) => {
+            console.log(data);
+            if (data.match("error")) {
+                rej(data);
+            }
+        });
+        result?.on("end", (d: string) => res(d));
+        console.log("> exiftool " + args.join(" "));
     });
-    args.push(`-makernote=${Buffer.from(JSON.stringify(makerNotes)).toString('base64')}`)
-    execFile(process.platform == "win32" ? "./node_modules/exiftool-vendored.exe/bin/exiftool.exe" : "exiftool", args).stdout?.on("data", (data: string) => {
-        console.log(data);
-    });
-    console.log("> " + process.platform == "win32" ? "exiftool.exe " : "exiftool" + args.join(" "));
 }
 
+function convertImage(file: string): Promise<string> {
+    return new Promise((res, rej) => {
+        if (config.compressFormat === "") { res(file); return; }
+        const dest = file.replace(/.png$/, '.' + config.compressFormat);
+        sharp(file)
+            .toFormat(config.compressFormat, config.compressOptions)
+            .toFile(dest)
+            .then(() => {
+                fs.rm(file, (e) => {
+                    if (e) rej(e);
+                    else res(dest);
+                })
+            })
+            .catch((e: any) => rej(e));
+    });
+}
 
 let isVL2Enabled = false;
 let focalLength = config.focalDefault;
@@ -288,7 +320,27 @@ class logReader {
                         tag.push(new PngTag("Make", "logilabo"));
                         tag.push(new PngTag("Model", "VirtualLens2"));
                     }
-                    writeMetadata(fpath, tag, new MakerNotes(roomInfo, players));
+
+                    const makerNote = new MakerNotes(roomInfo, players);
+
+                    convertImage(fpath).then((file) => {
+                        writeMetadata(file, tag, makerNote).then(() => {
+                            const dir = file.split(path.sep);
+                            const targetDir = config.destDir === "" ? path.dirname(file) + "/" : config.destDir + "/" + dir[dir.length - 2] + "/";
+                            if (!fs.existsSync(targetDir))
+                                fs.mkdirSync(targetDir);
+                            const dest = targetDir + path.basename(file);
+
+                            if (path.normalize(file) != path.normalize(dest))
+                                fs.copyFile(file, dest, fs.constants.COPYFILE_EXCL, (err) => {
+                                    if (err) throw err;
+                                    fs.rm(file, (err) => { if (err) throw err; });
+                                });
+                        });
+                    }).catch(e => {
+                        console.warn(e);
+                        writeMetadata(fpath, tag, makerNote);
+                    })
                     // console.log(line, match);
                 }
             }
