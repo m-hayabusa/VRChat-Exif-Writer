@@ -9,36 +9,53 @@ import path from 'path';
 const compatdata_path = process.platform == "win32" ? "" : process.env.STEAM_COMPAT_DATA_PATH == undefined ? `${process.env["HOME"]}/.local/share/Steam/steamapps/compatdata/` : `${process.env.STEAM_COMPAT_DATA_PATH}`
 
 class Config {
-    static focalMin = 12;
-    static focalMax = 300;
-    static focalDefault = 50;
-
-    static apertureMin = 22;
-    static apertureMax = 1;
-    static apertureDefault = Infinity;
-
-    static exposureRange = 3;
-    static exposureDefault = 0;
-
-    static listenPort = 9001;
-
-    static destDir = "";
-    static compressFormat: keyof sharp.FormatEnum | undefined = "avif";
-    static compressOptions: sharp.OutputOptions
-        | sharp.JpegOptions
-        | sharp.PngOptions
-        | sharp.WebpOptions
-        | sharp.AvifOptions
-        | sharp.HeifOptions
-        | sharp.JxlOptions
-        | sharp.GifOptions
-        | sharp.Jp2Options
-        | sharp.TiffOptions = {
-            // lossless: true,
-            quality: 90,
-            effort: 2,
+    constructor() {
+        let configFile: Config | undefined;
+        try {
+            configFile = JSON.parse(fs.readFileSync("./config.json").toString()) as Config;
+        } catch (e) {
+            fs.writeFileSync("./config.json", JSON.stringify(this, undefined, "    "));
+            configFile = undefined;
         }
+
+        this.focalMin = configFile?.focalMin ? configFile.focalMin : 12;
+        this.focalMax = configFile?.focalMax ? configFile.focalMax : 300;
+        this.focalDefault = configFile?.focalDefault ? configFile.focalDefault : 50;
+
+        this.apertureMin = configFile?.apertureMin ? configFile.apertureMin : 22;
+        this.apertureMax = configFile?.apertureMax ? configFile.apertureMax : 1;
+        this.apertureDefault = configFile?.apertureDefault ? configFile.apertureDefault : Infinity;
+
+        this.exposureRange = configFile?.exposureRange ? configFile.exposureRange : 3;
+        this.exposureDefault = configFile?.exposureDefault ? configFile.exposureDefault : 0;
+
+        this.listenPort = configFile?.listenPort ? configFile.listenPort : 9001;
+        this.destDir = configFile?.destDir ? configFile?.destDir : "";
+        this.compressFormat = configFile?.compressFormat ? configFile?.compressFormat : "";
+        this.compressOptions = configFile?.compressOptions ? configFile?.compressOptions : {};
+
+        fs.writeFileSync("./config.json", JSON.stringify(this, undefined, "    "));
+    }
+
+    focalMin: number;
+    focalMax: number;
+    focalDefault: number;
+
+    apertureMin: number;
+    apertureMax: number;
+    apertureDefault: number;
+
+    exposureRange: number;
+    exposureDefault: number;
+
+    listenPort: number;
+
+    destDir: string;
+    compressFormat: keyof sharp.FormatEnum | "";
+    compressOptions: sharp.OutputOptions | sharp.JpegOptions | sharp.PngOptions | sharp.WebpOptions | sharp.AvifOptions | sharp.HeifOptions | sharp.JxlOptions | sharp.GifOptions | sharp.Jp2Options | sharp.TiffOptions;
 }
+
+const config = new Config()
 
 class MediaTag {
     prefix = "";
@@ -109,10 +126,10 @@ async function writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerN
 
 function convertImage(file: string): Promise<string> {
     return new Promise((res, rej) => {
-        if (Config.compressFormat == undefined) { res(file); return; }
-        const dest = file.replace(/.png$/, '.' + Config.compressFormat);
+        if (config.compressFormat === "") { res(file); return; }
+        const dest = file.replace(/.png$/, '.' + config.compressFormat);
         sharp(file)
-            .toFormat(Config.compressFormat, Config.compressOptions)
+            .toFormat(config.compressFormat, config.compressOptions)
             .toFile(dest)
             .then(() => {
                 fs.rm(file, (e) => {
@@ -125,9 +142,9 @@ function convertImage(file: string): Promise<string> {
 }
 
 let isVL2Enabled = false;
-let focalLength = Config.focalDefault;
-let apertureValue = Config.apertureDefault;
-let exposureIndex = Config.exposureDefault;
+let focalLength = config.focalDefault;
+let apertureValue = config.apertureDefault;
+let exposureIndex = config.exposureDefault;
 let roomInfo = new RoomInfo();
 let players: string[] = [];
 let restart = false;
@@ -140,7 +157,7 @@ class OscServer {
         this.oscServer?.close();
     }
     listen() {
-        this.oscServer = new Server(Config.listenPort, '0.0.0.0', () => {
+        this.oscServer = new Server(config.listenPort, '0.0.0.0', () => {
             // console.log('OSC Server is listening');
         });
 
@@ -160,21 +177,21 @@ class OscServer {
                 if (val === 0)
                     focalLength = Infinity;
                 else
-                    focalLength = Config.focalMin * Math.exp(val * Math.log(Config.focalMax / Config.focalMin));
+                    focalLength = config.focalMin * Math.exp(val * Math.log(config.focalMax / config.focalMin));
             }
 
             if (path === "/avatar/parameters/VirtualLens2_Aperture") {
-                apertureValue = Config.apertureMin * Math.exp(val * Math.log(Config.apertureMax / Config.apertureMin));
+                apertureValue = config.apertureMin * Math.exp(val * Math.log(config.apertureMax / config.apertureMin));
             }
 
             if (path === "/avatar/parameters/VirtualLens2_Exposure") {
-                exposureIndex = (2 * val - 1) * Config.exposureRange;
+                exposureIndex = (2 * val - 1) * config.exposureRange;
             }
 
             if (path === "/avatar/change") {
-                focalLength = Config.focalDefault;
-                apertureValue = Config.apertureDefault;
-                exposureIndex = Config.exposureDefault;
+                focalLength = config.focalDefault;
+                apertureValue = config.apertureDefault;
+                exposureIndex = config.exposureDefault;
                 isVL2Enabled = false;
             }
         });
@@ -282,7 +299,7 @@ class logReader {
                     convertImage(fpath).then((file) => {
                         writeMetadata(file, tag, makerNote).then(() => {
                             const dir = file.split(path.sep);
-                            const targetDir = Config.destDir !== "" ? Config.destDir + "/" + dir[dir.length - 2] + "/" : path.dirname(file) + "/";
+                            const targetDir = config.destDir === "" ? path.dirname(file) + "/" : config.destDir + "/" + dir[dir.length - 2] + "/";
                             if (!fs.existsSync(targetDir))
                                 fs.mkdirSync(targetDir);
                             const dest = targetDir + path.basename(file);
@@ -308,9 +325,9 @@ class logReader {
                     roomInfo.permission = (match[2] ? match[2] : "public") + (match[4] ? "+" : "");
                     roomInfo.organizer = match[3];
                     players = [];
-                    focalLength = Config.focalDefault;
-                    apertureValue = Config.apertureDefault;
-                    exposureIndex = Config.exposureDefault;
+                    focalLength = config.focalDefault;
+                    apertureValue = config.apertureDefault;
+                    exposureIndex = config.exposureDefault;
                     isVL2Enabled = false;
 
                     // console.log(roomInfo);
