@@ -10,19 +10,46 @@ import { AddressInfo } from 'net';
 const compatdata_path = process.platform == "win32" ? "" : process.env.STEAM_COMPAT_DATA_PATH == undefined ? `${process.env["HOME"]}/.local/share/Steam/steamapps/compatdata/` : `${process.env.STEAM_COMPAT_DATA_PATH}`
 
 class Config {
-    static focalMin = 12;
-    static focalMax = 300;
-    static focalDefault = 50;
+    constructor() {
+        let configFile: Config | undefined;
+        try {
+            configFile = JSON.parse(fs.readFileSync("./config.json").toString()) as Config;
+        } catch (e) {
+            fs.writeFileSync("./config.json", JSON.stringify(this, undefined, "    "));
+            configFile = undefined;
+        }
 
-    static apertureMin = 22;
-    static apertureMax = 1;
-    static apertureDefault = Infinity;
+        this.focalMin = configFile?.focalMin ? configFile.focalMin : 12;
+        this.focalMax = configFile?.focalMax ? configFile.focalMax : 300;
+        this.focalDefault = configFile?.focalDefault ? configFile.focalDefault : 50;
 
-    static exposureRange = 3;
-    static exposureDefault = 0;
+        this.apertureMin = configFile?.apertureMin ? configFile.apertureMin : 22;
+        this.apertureMax = configFile?.apertureMax ? configFile.apertureMax : 1;
+        this.apertureDefault = configFile?.apertureDefault ? configFile.apertureDefault : Infinity;
 
-    static listenPort = 9001;
+        this.exposureRange = configFile?.exposureRange ? configFile.exposureRange : 3;
+        this.exposureDefault = configFile?.exposureDefault ? configFile.exposureDefault : 0;
+
+        this.listenPort = configFile?.listenPort ? configFile.listenPort : 9001;
+
+        fs.writeFileSync("./config.json", JSON.stringify(this, undefined, "    "));
+    }
+
+    focalMin: number;
+    focalMax: number;
+    focalDefault: number;
+
+    apertureMin: number;
+    apertureMax: number;
+    apertureDefault: number;
+
+    exposureRange: number;
+    exposureDefault: number;
+
+    listenPort: number;
 }
+
+const config = new Config()
 
 class MediaTag {
     prefix = "";
@@ -86,9 +113,9 @@ function writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes) 
 
 
 let isVL2Enabled = false;
-let focalLength = Config.focalDefault;
-let apertureValue = Config.apertureDefault;
-let exposureIndex = Config.exposureDefault;
+let focalLength = config.focalDefault;
+let apertureValue = config.apertureDefault;
+let exposureIndex = config.exposureDefault;
 let roomInfo = new RoomInfo();
 let players: string[] = [];
 let restart = false;
@@ -101,7 +128,7 @@ class OscServer {
         this.oscServer?.close();
     }
     listen() {
-        this.oscServer = new Server(Config.listenPort, '0.0.0.0', () => {
+        this.oscServer = new Server(config.listenPort, '0.0.0.0', () => {
             // console.log('OSC Server is listening');
         });
 
@@ -121,21 +148,21 @@ class OscServer {
                 if (val === 0)
                     focalLength = Infinity;
                 else
-                    focalLength = Config.focalMin * Math.exp(val * Math.log(Config.focalMax / Config.focalMin));
+                    focalLength = config.focalMin * Math.exp(val * Math.log(config.focalMax / config.focalMin));
             }
 
             if (path === "/avatar/parameters/VirtualLens2_Aperture") {
-                apertureValue = Config.apertureMin * Math.exp(val * Math.log(Config.apertureMax / Config.apertureMin));
+                apertureValue = config.apertureMin * Math.exp(val * Math.log(config.apertureMax / config.apertureMin));
             }
 
             if (path === "/avatar/parameters/VirtualLens2_Exposure") {
-                exposureIndex = (2 * val - 1) * Config.exposureRange;
+                exposureIndex = (2 * val - 1) * config.exposureRange;
             }
 
             if (path === "/avatar/change") {
-                focalLength = Config.focalDefault;
-                apertureValue = Config.apertureDefault;
-                exposureIndex = Config.exposureDefault;
+                focalLength = config.focalDefault;
+                apertureValue = config.apertureDefault;
+                exposureIndex = config.exposureDefault;
                 isVL2Enabled = false;
             }
         });
@@ -273,9 +300,9 @@ class logReader {
                     roomInfo.permission = (match[2] ? match[2] : "public") + (match[4] ? "+" : "");
                     roomInfo.organizer = match[3];
                     players = [];
-                    focalLength = Config.focalDefault;
-                    apertureValue = Config.apertureDefault;
-                    exposureIndex = Config.exposureDefault;
+                    focalLength = config.focalDefault;
+                    apertureValue = config.apertureDefault;
+                    exposureIndex = config.exposureDefault;
                     isVL2Enabled = false;
 
                     // console.log(roomInfo);
