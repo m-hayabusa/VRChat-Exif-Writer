@@ -3,7 +3,7 @@ Param(
     $DestPath
 )
 
-$path_to_exiftool = "$($env:LocalAppData)\Programs\VRChat-Exif-Writer\node_modules\exiftool.exe\vendor\exiftool.exe"
+$path_to_exiftool = "$($env:LocalAppData)\Programs\VRChat-Exif-Writer\node_modules\exiftool-vendored.exe\bin\exiftool.exe"
 $destDirRoot = $DestPath
 
 $Pathes | ForEach-Object {
@@ -47,9 +47,22 @@ $Pathes | ForEach-Object {
             $source = "Quest"
         }
 
+        elseif ($_ -match 'Screenshot_(?:(?:VirtualDesktop.Android))_(\d{4})\.(\d{2})\.(\d{2})-(\d{2})\.(\d{2})\.(\d{2})\.(\d{3})_(\d{3})\.(jpeg|mp4)$') {
+            if ($Matches.9 -eq "jpeg") {
+                $matched = "image"
+            } else {
+                $matched = "video"
+            }
+            $newDate = "$($Matches.1):$($Matches.2):$($Matches.3) $($Matches.4):$($Matches.5):$($Matches.6)"
+            $year = $Matches.1
+            $mon = $Matches.2
+            $source = "PICO 4"
+        }
+
         if ($matched -eq "image") {
             $datetime = $(&${path_to_exiftool} -EXIF:DateTimeOriginal $_.FullName -charset utf8)
             if ($datetime -eq $null) {
+                $newDate = $newDate + "+09:00"
                 Write-host "WRITE" $_ $newDate
                 &${path_to_exiftool} -overwrite_original -EXIF:DateTimeOriginal=$newDate $_.FullName -charset utf8 > $null
             } else {
