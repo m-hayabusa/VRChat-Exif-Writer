@@ -3,6 +3,7 @@ import { execFile, exec } from 'child_process';
 import { Tail } from 'tail';
 import * as fs from 'fs';
 import os from 'os';
+import path from 'path';
 
 const compatdata_path = process.platform == "win32" ? "" : process.env.STEAM_COMPAT_DATA_PATH == undefined ? `${process.env["HOME"]}/.local/share/Steam/steamapps/compatdata/` : `${process.env.STEAM_COMPAT_DATA_PATH}`
 
@@ -69,16 +70,32 @@ class MakerNotes {
     }
 }
 
-function writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes) {
-    let args = ["-charset", "utf8", "-overwrite_original", file];
-    data.forEach(e => {
-        args.push(e.toString());
+async function writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes) {
+    return new Promise((res, rej) => {
+        const argFile = path.dirname(file) + path.sep + path.basename(file) + ".tags.txt";
+        console.log(argFile);
+        const args = fs.createWriteStream(argFile);
+
+        args.write(file + "\n");
+        args.write("-overwrite_original\n");
+        data.forEach(e => {
+            args.write(e.toString() + "\n");
+        });
+        args.write(`-makernote=${Buffer.from(JSON.stringify(makerNotes)).toString('base64')}\n`);
+
+        args.close();
+        const result = execFile(process.platform == "win32" ? "./node_modules/exiftool-vendored.exe/bin/exiftool.exe" : "exiftool", ["-@", argFile]).stdout;
+        result?.on("data", (data: string) => {
+            console.log(data);
+            if (data.match("error")) {
+                rej(data);
+            }
+        });
+        result?.on("end", (d: string) => {
+            res(d);
+            fs.rmSync(argFile);
+        });
     });
-    args.push(`-makernote=${Buffer.from(JSON.stringify(makerNotes)).toString('base64')}`)
-    execFile(process.platform == "win32" ? "./node_modules/exiftool-vendored.exe/bin/exiftool.exe" : "exiftool", args).stdout?.on("data", (data: string) => {
-        console.log(data);
-    });
-    console.log("> " + process.platform == "win32" ? "exiftool.exe " : "exiftool" + args.join(" "));
 }
 
 
