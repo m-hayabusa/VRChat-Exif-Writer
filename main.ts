@@ -110,20 +110,29 @@ class MakerNotes {
 
 async function writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes) {
     return new Promise((res, rej) => {
-        let args = ["-charset", "utf8", "-overwrite_original", file];
+        const argFile = path.dirname(file) + path.sep + path.basename(file) + ".tags.txt";
+        console.log(argFile);
+        const args = fs.createWriteStream(argFile);
+
+        args.write(file + "\n");
+        args.write("-overwrite_original\n");
         data.forEach(e => {
-            args.push(e.toString());
+            args.write(e.toString() + "\n");
         });
-        args.push(`-makernote=${Buffer.from(JSON.stringify(makerNotes)).toString('base64')}`)
-        const result = execFile(process.platform == "win32" ? "./node_modules/exiftool-vendored.exe/bin/exiftool.exe" : "exiftool", args).stdout;
+        args.write(`-makernote=${Buffer.from(JSON.stringify(makerNotes)).toString('base64')}\n`);
+
+        args.close();
+        const result = execFile(process.platform == "win32" ? "./node_modules/exiftool-vendored.exe/bin/exiftool.exe" : "exiftool", ["-@", argFile]).stdout;
         result?.on("data", (data: string) => {
             console.log(data);
             if (data.match("error")) {
                 rej(data);
             }
         });
-        result?.on("end", (d: string) => res(d));
-        console.log("> exiftool " + args.join(" "));
+        result?.on("end", (d: string) => {
+            res(d);
+            fs.rmSync(argFile);
+        });
     });
 }
 
