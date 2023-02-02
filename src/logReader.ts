@@ -62,14 +62,19 @@ export default class LogReader {
 
         this.tail.on("line", (line: string) => {
             // if (line != "") console.log(line);
-            {
+            this.check.forEach(f => f(line));
+        });
+    }
+
+    private check: Array<(line: string) => void> = [
+        (line: string) => {
                 const match = line.match(/VRCApplication: OnApplicationQuit/);
                 if (match) {
                     console.log("VRChat: Quit");
                     State.restart = true;
                 }
-            }
-            {
+        },
+        (line: string) => {
                 const match = line.match(/([0-9\.\: ]*) Log        -  \[VRC Camera\] Took screenshot to\: (.*)/);
                 if (match) {
                     const DateTime = match[1].replaceAll('.', ':');
@@ -107,8 +112,8 @@ export default class LogReader {
                     this.writeMetadata(fpath, tag, new MakerNotes(State.roomInfo, State.players));
                     // console.log(line, match);
                 }
-            }
-            {
+        },
+        (line: string) => {
                 const match = line.match(/.*\[Behaviour\] Joining (wrld_.*?):(?:.*?(private|friends|hidden|group)\((.*?)\))?(~canRequestInvite)?/);
                 if (match) {
                     State.roomInfo = new RoomInfo();
@@ -124,16 +129,16 @@ export default class LogReader {
                     // console.log(State.roomInfo);
                     // console.log(line, match);
                 }
-            }
-            {
+        },
+        (line: string) => {
                 const match = line.match(/Joining or Creating Room: (.*)/);
                 if (match) {
                     State.roomInfo.world_name = match[1];
                     console.log(State.roomInfo);
                     // console.log(line, match);
                 }
-            }
-            {
+        },
+        (line: string) => {
                 const match = line.match(/OnPlayerJoined (.*)/);
                 if (match) {
                     State.players.push(match[1]);
@@ -141,8 +146,8 @@ export default class LogReader {
                     console.log("join", match[1]);
                     // console.log(line, match);
                 }
-            }
-            {
+        },
+        (line: string) => {
                 const match = line.match(/OnPlayerLeft (.*)/);
                 if (match) {
                     const i = State.players.indexOf(match[1]);
@@ -154,8 +159,7 @@ export default class LogReader {
                     }
                 }
             }
-        });
-    }
+    ];
 
     private async writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes): Promise<void> {
         return new Promise((res, rej) => {
