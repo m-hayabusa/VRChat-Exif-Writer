@@ -27,6 +27,7 @@ class Config {
         this.exposureDefault = configFile?.exposureDefault ? configFile.exposureDefault : 0;
 
         this.listenPort = configFile?.listenPort ? configFile.listenPort : 9001;
+        this.listenAddress = configFile?.listenAddress ? configFile.listenAddress : "127.0.0.1";
 
         fs.writeFileSync("./config.json", JSON.stringify(this, undefined, "    "));
     }
@@ -43,6 +44,7 @@ class Config {
     exposureDefault: number;
 
     listenPort: number;
+    listenAddress: string;
 }
 
 export const config = new Config();

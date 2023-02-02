@@ -10,7 +10,7 @@ export default class OscServer {
         this.oscServer?.close();
     }
     listen() {
-        this.oscServer = new Server(config.listenPort, '0.0.0.0', () => {
+        this.oscServer = new Server(config.listenPort, config.listenAddress, () => {
             // console.log('OSC Server is listening');
         });
 
