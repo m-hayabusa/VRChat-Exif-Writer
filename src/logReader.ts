@@ -90,14 +90,14 @@ export default class LogReader {
                         tag.push(new ExifTag("Model", "VirtualLens2"));
                         tag.push(new ExifTag("DateTimeOriginal", DateTime));
                         tag.push(new ExifTag("FocalLength", State.focalLength.toFixed(1)));
-                        tag.push(new ExifTag("FNumber", State.apertureValue.toFixed(1)));
+                        if (State.apertureValue != config.apertureMin) tag.push(new ExifTag("FNumber", State.apertureValue.toFixed(1)));
                         tag.push(new ExifTag("ExposureIndex", State.exposureIndex.toFixed(1)));
                         tag.push(new ExifTag("ImageDescription", `at VRChat ${State.roomInfo.world_name}, with ${State.players.toString()}`));
                         tag.push(new XmpTag("Make", "logilabo"));
                         tag.push(new XmpTag("Model", "VirtualLens2"));
                         tag.push(new XmpTag("DateTimeOriginal", DateTime));
                         tag.push(new XmpTag("FocalLength", State.focalLength.toFixed(1)));
-                        tag.push(new XmpTag("FNumber", State.apertureValue.toFixed(1)));
+                        if (State.apertureValue != config.apertureMin) tag.push(new XmpTag("FNumber", State.apertureValue.toFixed(1)));
                         tag.push(new XmpTag("ExposureIndex", State.focalLength.toFixed(1)));
                         tag.push(new XmpTag("ImageDescription", `at VRChat ${State.roomInfo.world_name}, with ${State.players.toString()}`));
                         tag.push(new PngTag("Description", `at VRChat ${State.roomInfo.world_name}, with ${State.players.toString()}`));

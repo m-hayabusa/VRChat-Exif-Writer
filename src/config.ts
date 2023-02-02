@@ -17,11 +17,7 @@ class Config {
         this.apertureMin = configFile?.apertureMin ? configFile.apertureMin : 22;
         this.apertureMax = configFile?.apertureMax ? configFile.apertureMax : 1;
 
-        if (configFile?.apertureDefault === this.apertureMax) {
-            this.apertureDefault = Infinity;
-        } else {
-            this.apertureDefault = configFile?.apertureDefault ? configFile?.apertureDefault : this.apertureMax;
-        }
+        this.apertureDefault = configFile?.apertureDefault ? configFile?.apertureDefault : this.apertureMin;
 
         this.exposureRange = configFile?.exposureRange ? configFile.exposureRange : 3;
         this.exposureDefault = configFile?.exposureDefault ? configFile.exposureDefault : 0;
