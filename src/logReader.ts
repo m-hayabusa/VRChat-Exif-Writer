@@ -61,7 +61,7 @@ export default class LogReader {
         });
 
         this.tail.on("line", (line: string) => {
-            if (line != "") console.log(line);
+            // if (line != "") console.log(line);
             {
                 const match = line.match(/VRCApplication: OnApplicationQuit/);
                 if (match) {
