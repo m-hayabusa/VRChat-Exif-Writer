@@ -16,11 +16,19 @@ const compatdata_path = process.platform == "win32" ? "" : process.env.STEAM_COM
 
 
 class HttpServer {
-    private htmlResBody = fs.readFileSync("./cushion.html", { encoding: "utf8" });
-    httpServer = http.createServer((req, res) => {
-        res.writeHead(200, { "Content-Type": "text/html" });
-        res.end(this.htmlResBody);
-    });
+    private htmlResBody;
+    httpServer;
+    get port() {
+        return (this.httpServer.address() as AddressInfo).port;
+    }
+    constructor() {
+        this.htmlResBody = fs.readFileSync("./cushion.html", { encoding: "utf8" });
+        this.httpServer = http.createServer((req, res) => {
+            res.writeHead(200, { "Content-Type": "text/html" });
+            res.end(this.htmlResBody);
+        });
+        this.httpServer.listen();
+    }
 }
 const httpServer = new HttpServer();
 
@@ -76,7 +84,7 @@ export default class LogReader {
         });
 
         this.tail.on("line", (line: string) => {
-            // if (line != "") console.log(line);
+            if (line != "") console.log(line);
             {
                 const match = line.match(/VRCApplication: OnApplicationQuit/);
                 if (match) {
@@ -86,19 +94,27 @@ export default class LogReader {
             }
             {
                 const match = line.match(/\[Video Playback\] Attempting to resolve URL 'http:\/\/localhost\/Temporary_Listen_Addresses\/openURL\/(.*)'/);
+                let url = "";
                 if (match) {
-                    console.log("OpenURL", match[1]);
-
-                    let url = match[1];
-                    if (!match[1].match(/^https?:\/\/(.+\.)?(vrchat\.com|vrch\.at|booth\.pm|gumroad\.com|twitter\.com|vroid\.com)(\/|\?|$)/i)) {
-                        url = `http://localhost:${(httpServer.httpServer.address() as AddressInfo).port}?world_id=${State.roomInfo.world_id}&world_name=${encodeURIComponent(`${State.roomInfo.world_name}`)}&url=${encodeURIComponent(match[1])}`;
+                    url = match[1];
+                } else {
+                    const match2 = line.match(/\[YukiYukiVirtual\/OpenURL\](.*)/);
+                    if (match2) {
+                        url = match2[1];
+                    }
+                }
+                if (url !== "") {
+                    console.log("OpenURL", url);
+                    console.log(httpServer.httpServer.address());
+                    if (!url.match(/^https?:\/\/(.+\.)?(vrchat\.com|vrch\.at|booth\.pm|gumroad\.com|twitter\.com|vroid\.com)(\/|\?|$)/i)) {
+                        url = `http://localhost:${httpServer.port}?world_id=${State.roomInfo.world_id}&world_name=${encodeURIComponent(`${State.roomInfo.world_name}`)}&url=${encodeURIComponent(url)}`;
                     }
 
                     exec(process.platform == "win32" ? `start ${url.replaceAll(/([&\|<>\(\)\"])/g, "^$1")}` : `xdg-open "${url}"`);
                     nodeNotifier.notify(
                         {
                             title: "VRChat Link Opener",
-                            message: `Opened ${match[1]} by ${State.roomInfo.world_name}`,
+                            message: `Opened ${url} by ${State.roomInfo.world_name}`,
                             sound: true,
                             wait: false,
                         }
