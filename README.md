@@ -76,17 +76,10 @@ npm run start
 ## 手動でセットアップする場合 / Linux
 Node.JSとGitをインストールしてください。
 
-Linux(Steam Deck等)で使用する場合、Node.JSに加えて別途exiftoolのインストールが必要になります。  
-ディストリビューションごとに適切なパッケージをインストールしてください。
+Linux(Steam Deck等)で使用する場合、Node.JSに加えて別途perlのインストールが必要になります。
+(ほとんどの環境ですでにインストールされていると思います)  
+ディストリビューションごとに適切なパッケージをインストールしてください。 
 Node.JSはバージョン管理ツール(`nvm`や`n`のような)を利用してインストールすることをおすすめします。
-
-```shell
-# Ubuntu
-$ sudo apt install libimage-exiftool-perl
-
-# Arch Linux
-$ sudo pacman -S perl-image-exiftool
-```
 
 Linuxの場合、ターミナルを起動し、以下のコマンドを入力します。  
 (先頭の$は不要です)
@@ -114,3 +107,21 @@ $ git pull
 $ npm install
 $ npm run tsc
 ```
+
+# 設定
+VRChat-Exif-Writerのディレクトリにある、config.jsonを編集してください  
+存在しない場合、一回起動すると生成されるはずです
+```
+{
+    "focalMin": 12,        // VirtualLens2 の Min Focal Length
+    "focalMax": 300,       // VirtualLens2 の Max Focal Length 
+    "focalDefault": 50,    // VirtualLens2 の Default Focal Length 
+    "apertureMin": 22,     // VirtualLens2 の Min F Number
+    "apertureMax": 1,      // VirtualLens2 の Max F Number
+    "apertureDefault": 22, // VirtualLens2 の Default F Number
+    "exposureRange": 3,    // VirtualLens2 の Exposure Range 
+    "exposureDefault": 0,  // VirtualLens2 の Default Exposure 
+    "listenPort": 9001,    // VRChatがOSCを送信するUDPポート
+}
+```
+VL2導入時に各パラメータを設定していない / VRChatの起動オプションでOSCの宛先ポートを変更していない 場合、デフォルト設定のままで問題ないはずです
