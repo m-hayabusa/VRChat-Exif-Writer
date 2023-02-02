@@ -1,9 +1,10 @@
 import { Server } from 'node-osc';
-import { execFile, exec } from 'child_process';
+import { exec } from 'child_process';
 import { Tail } from 'tail';
 import * as fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { exiftool } from 'exiftool-vendored';
 
 const compatdata_path = process.platform == "win32" ? "" : process.env.STEAM_COMPAT_DATA_PATH == undefined ? `${process.env["HOME"]}/.local/share/Steam/steamapps/compatdata/` : `${process.env.STEAM_COMPAT_DATA_PATH}`
 
@@ -70,13 +71,12 @@ class MakerNotes {
     }
 }
 
-async function writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes) {
+async function writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes): Promise<void> {
     return new Promise((res, rej) => {
         const argFile = path.dirname(file) + path.sep + path.basename(file) + ".tags.txt";
         console.log(argFile);
         const args = fs.createWriteStream(argFile);
 
-        args.write(file + "\n");
         args.write("-overwrite_original\n");
         data.forEach(e => {
             args.write(e.toString() + "\n");
@@ -84,17 +84,16 @@ async function writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerN
         args.write(`-makernote=${Buffer.from(JSON.stringify(makerNotes)).toString('base64')}\n`);
 
         args.close();
-        const result = execFile(process.platform == "win32" ? "./node_modules/exiftool-vendored.exe/bin/exiftool.exe" : "exiftool", ["-@", argFile]).stdout;
-        result?.on("data", (data: string) => {
-            console.log(data);
-            if (data.match("error")) {
-                rej(data);
-            }
-        });
-        result?.on("end", (d: string) => {
-            res(d);
-            fs.rmSync(argFile);
-        });
+
+        exiftool.write(file, {}, ["-@", argFile])
+            .then(() => {
+                res();
+                fs.rmSync(argFile);
+            })
+            .catch((e) => {
+                console.warn(e);
+                rej();
+            });
     });
 }
 
