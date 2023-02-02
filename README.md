@@ -81,14 +81,6 @@ Linux(Steam Deck等)で使用する場合、Node.JSに加えて別途perlのイ�
 ディストリビューションごとに適切なパッケージをインストールしてください。 
 Node.JSはバージョン管理ツール(`nvm`や`n`のような)を利用してインストールすることをおすすめします。
 
-```shell
-# Ubuntu
-$ sudo apt install libimage-exiftool-perl
-
-# Arch Linux
-$ sudo pacman -S perl-image-exiftool
-```
-
 Linuxの場合、ターミナルを起動し、以下のコマンドを入力します。  
 (先頭の$は不要です)
 
