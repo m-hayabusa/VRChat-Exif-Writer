@@ -1,5 +1,5 @@
 export class MediaTag {
-    prefix = "";
+    prefix = "-";
     tag: string;
     data: string;
     constructor(tag: string, data: string) {
@@ -9,18 +9,6 @@ export class MediaTag {
     toString(): string {
         return `${this.prefix}:${this.tag}=${this.data}`
     }
-}
-
-export class ExifTag extends MediaTag {
-    prefix: string = "-exif";
-}
-
-export class XmpTag extends MediaTag {
-    prefix: string = "-xmp";
-}
-
-export class PngTag extends MediaTag {
-    prefix: string = "-png";
 }
 
 export class RoomInfo {
