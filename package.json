@@ -1,6 +1,6 @@
 {
   "name": "vrchat-exif-writer",
-  "type": "module",
+  "type": "commonjs",
   "version": "0.0.1",
   "description": "add EXIF tag to VRChat Pics.",
   "repository": {
@@ -9,7 +9,7 @@
   },
   "main": "main.js",
   "scripts": {
-    "start": "node main.js",
+    "start": "node built/main.js",
     "tsc": "tsc",
     "unregist": "powershell -C \"Start-Process powershell -Verb runAs -ArgumentList @('-ExecutionPolicy','Unrestricted','-C',\"$((Get-Location).Path + '\\utils\\unregist.ps1')\")\"",
     "regist": "powershell -C \"Start-Process powershell -Verb runAs -ArgumentList @('-ExecutionPolicy','Unrestricted','-C',\"$((Get-Location).Path + '\\utils\\regist.ps1')\")\""
@@ -17,7 +17,7 @@
   "author": "m-hayabusa (https://mewl.me/@mewl)",
   "license": "MIT",
   "dependencies": {
-    "exiftool-vendored.exe": "^12.54.0",
+    "exiftool-vendored": "^19.0.0",
     "node-osc": "^8.0.3",
     "sharp": "^0.31.3",
     "tail": "^2.2.4",
