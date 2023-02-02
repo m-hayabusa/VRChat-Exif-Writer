@@ -1,6 +1,6 @@
 {
   "name": "vrchat-exif-writer",
-  "type": "module",
+  "type": "commonjs",
   "version": "0.0.1",
   "description": "add EXIF tag to VRChat Pics.",
   "repository": {
