@@ -5,17 +5,24 @@ import LogReader from './logReader';
 import OscServer from './oscServer';
 import { State } from './state';
 
+async function checkRunning() {
+    return new Promise<void>(res => {
+        if (fs.existsSync(`${os.tmpdir()}/VRChat-Exif-Writer.pid`)) {
+            const pid = parseInt(fs.readFileSync(`${os.tmpdir()}/VRChat-Exif-Writer.pid`).toString());
+            exec(process.platform == "win32" ? `powershell.exe -C \"Get-Process -Id ${pid}\"` : `ps --no-headers -p ${pid}`, (error, stdout, stderr) => {
+                if (error?.code != 1) {
+                    throw new Error("Found Another Process");
+                } else {
+                    res();
+                    fs.writeFileSync(`${os.tmpdir()}/VRChat-Exif-Writer.pid`, process.pid.toString());
+                }
+            });
+        }
+    });
+}
 
-function main() {
-    if (fs.statSync(`${os.tmpdir()}/VRChat-Exif-Writer.pid`, { throwIfNoEntry: false })) {
-        const pid = parseInt(fs.readFileSync(`${os.tmpdir()}/VRChat-Exif-Writer.pid`).toString());
-        exec(process.platform == "win32" ? `powershell.exe -C \"Get-Process -Id ${pid}\"` : `ps --no-headers -p ${pid}`, (error, stdout, stderr) => {
-            if (error?.code != 1) {
-                throw new Error("Found Another Process");
-            }
-        });
-    }
-    fs.writeFile(`${os.tmpdir()}/VRChat-Exif-Writer.pid`, process.pid.toString(), () => { });
+async function main() {
+    await checkRunning();
 
     const log = new LogReader();
     const osc = new OscServer();
