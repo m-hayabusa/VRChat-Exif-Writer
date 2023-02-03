@@ -197,8 +197,8 @@ export default class LogReader {
                 const hostname = (new URL(url)).hostname;
                 const allowed = config.linkWhiteList.map(
                     (allowedHost): boolean => {
-                        if (allowedHost.startsWith("*"))
-                            return hostname.endsWith(allowedHost.replace("*", ""));
+                        if (allowedHost.startsWith("*."))
+                            return hostname.endsWith(allowedHost.substring(1)) || hostname === allowedHost.substring(2);
                         else
                             return hostname === allowedHost;
                     }).includes(true);
