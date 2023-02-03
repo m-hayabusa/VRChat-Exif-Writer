@@ -194,9 +194,17 @@ export default class LogReader {
                 const url = match[1];
                 console.log("OpenURL", url);
 
-                let jump = url;
+                const hostname = (new URL(url)).hostname;
+                const allowed = config.linkWhiteList.map(
+                    (allowedHost): boolean => {
+                        if (allowedHost.startsWith("*"))
+                            return hostname.endsWith(allowedHost.replace("*", ""));
+                        else
+                            return hostname === allowedHost;
+                    }).includes(true);
 
-                if (!url.match(/^https?:\/\/(.+\.)?(vrchat\.com|vrch\.at|booth\.pm|gumroad\.com|twitter\.com|vroid\.com)(\/|\?|$)/i)) {
+                let jump = url;
+                if (!allowed) {
                     jump = `http://localhost:${httpServer.port}?world_id=${State.roomInfo.world_id}&world_name=${encodeURIComponent(`${State.roomInfo.world_name}`)}&url=${encodeURIComponent(url)}`;
                 }
 
