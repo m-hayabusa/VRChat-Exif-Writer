@@ -10,7 +10,7 @@ import sharp from 'sharp';
 
 import { State } from './state';
 import { config } from './config';
-import { MediaTag, XmpTag, ExifTag, PngTag, RoomInfo, MakerNotes } from './tags';
+import { MediaTag, RoomInfo, MakerNotes } from './tags';
 
 const compatdata_path = process.platform == "win32" ? "" : process.env.STEAM_COMPAT_DATA_PATH == undefined ? `${process.env["HOME"]}/.local/share/Steam/steamapps/compatdata/` : `${process.env.STEAM_COMPAT_DATA_PATH}`
 
@@ -84,150 +84,111 @@ export default class LogReader {
         });
 
         this.tail.on("line", (line: string) => {
-            if (line != "") console.log(line);
-            {
-                const match = line.match(/VRCApplication: OnApplicationQuit/);
-                if (match) {
-                    console.log("VRChat: Quit");
-                    State.restart = true;
-                }
-            }
-            {
-                const match = line.match(/\[Video Playback\] Attempting to resolve URL 'http:\/\/localhost\/Temporary_Listen_Addresses\/openURL\/(.*)'/);
-                let url = "";
-                if (match) {
-                    url = match[1];
-                } else {
-                    const match2 = line.match(/\[YukiYukiVirtual\/OpenURL\](.*)/);
-                    if (match2) {
-                        url = match2[1];
-                    }
-                }
-                if (url !== "") {
-                    console.log("OpenURL", url);
-                    console.log(httpServer.httpServer.address());
-                    if (!url.match(/^https?:\/\/(.+\.)?(vrchat\.com|vrch\.at|booth\.pm|gumroad\.com|twitter\.com|vroid\.com)(\/|\?|$)/i)) {
-                        url = `http://localhost:${httpServer.port}?world_id=${State.roomInfo.world_id}&world_name=${encodeURIComponent(`${State.roomInfo.world_name}`)}&url=${encodeURIComponent(url)}`;
-                    }
-
-                    exec(process.platform == "win32" ? `start ${url.replaceAll(/([&\|<>\(\)\"])/g, "^$1")}` : `xdg-open "${url}"`);
-                    nodeNotifier.notify(
-                        {
-                            title: "VRChat Link Opener",
-                            message: `Opened ${url} by ${State.roomInfo.world_name}`,
-                            sound: true,
-                            wait: false,
-                        }
-                    );
-                }
-            }
-            {
-                const match = line.match(/([0-9\.\: ]*) Log        -  \[VRC Camera\] Took screenshot to\: (.*)/);
-                if (match) {
-                    const DateTime = match[1].replaceAll('.', ':');
-
-                    const fpath = process.platform == "win32" ? match[2] : match[2].replaceAll('C:\\', (`${compatdata_path}/438100/pfx/drive_c/`)).replaceAll('\\', '/');
-
-                    const tag: Array<MediaTag> = [];
-
-                    tag.push(new ExifTag("DateTimeOriginal", DateTime));
-                    tag.push(new ExifTag("ImageDescription", `at VRChat ${State.roomInfo.world_name}, with ${State.players.toString()}`));
-                    tag.push(new XmpTag("DateTimeOriginal", DateTime));
-                    tag.push(new XmpTag("ImageDescription", `at VRChat ${State.roomInfo.world_name}, with ${State.players.toString()}`));
-                    tag.push(new PngTag("Description", `at VRChat ${State.roomInfo.world_name}, with ${State.players.toString()}`));
-                    tag.push(new PngTag("CreationTime", DateTime));
-
-                    if (State.isVL2Enabled) {
-                        tag.push(new ExifTag("Make", "logilabo"));
-                        tag.push(new ExifTag("Model", "VirtualLens2"));
-                        tag.push(new ExifTag("DateTimeOriginal", DateTime));
-                        tag.push(new ExifTag("FocalLength", State.focalLength.toFixed(1)));
-                        if (State.apertureValue != config.apertureMin) tag.push(new ExifTag("FNumber", State.apertureValue.toFixed(1)));
-                        tag.push(new ExifTag("ExposureIndex", State.exposureIndex.toFixed(1)));
-                        tag.push(new ExifTag("ImageDescription", `at VRChat ${State.roomInfo.world_name}, with ${State.players.toString()}`));
-                        tag.push(new XmpTag("Make", "logilabo"));
-                        tag.push(new XmpTag("Model", "VirtualLens2"));
-                        tag.push(new XmpTag("DateTimeOriginal", DateTime));
-                        tag.push(new XmpTag("FocalLength", State.focalLength.toFixed(1)));
-                        if (State.apertureValue != config.apertureMin) tag.push(new XmpTag("FNumber", State.apertureValue.toFixed(1)));
-                        tag.push(new XmpTag("ExposureIndex", State.focalLength.toFixed(1)));
-                        tag.push(new XmpTag("ImageDescription", `at VRChat ${State.roomInfo.world_name}, with ${State.players.toString()}`));
-                        tag.push(new PngTag("Description", `at VRChat ${State.roomInfo.world_name}, with ${State.players.toString()}`));
-                        tag.push(new PngTag("Make", "logilabo"));
-                        tag.push(new PngTag("Model", "VirtualLens2"));
-                    }
-
-                    const makerNote = new MakerNotes(State.roomInfo, State.players);
-
-                    this.convertImage(fpath).then((file) => {
-                        this.writeMetadata(file, tag, makerNote).then(() => {
-                            const dir = file.split(path.sep);
-                            const targetDir = config.destDir === "" ? path.dirname(file) + "/" : config.destDir + "/" + dir[dir.length - 2] + "/";
-                            if (!fs.existsSync(targetDir))
-                                fs.mkdirSync(targetDir);
-                            const dest = targetDir + path.basename(file);
-
-                            if (path.normalize(file) != path.normalize(dest))
-                                fs.copyFile(file, dest, fs.constants.COPYFILE_EXCL, (err) => {
-                                    if (err) throw err;
-                                    fs.rm(file, (err) => { if (err) throw err; });
-                                });
-                        });
-                    }).catch(e => {
-                        console.warn(e);
-                        this.writeMetadata(fpath, tag, makerNote);
-                    })
-                    // console.log(line, match);
-                }
-            }
-            {
-                const match = line.match(/.*\[Behaviour\] Joining (wrld_.*?):(?:.*?(private|friends|hidden|group)\((.*?)\))?(~canRequestInvite)?/);
-                if (match) {
-                    State.roomInfo = new RoomInfo();
-                    State.roomInfo.world_id = match[1];
-                    State.roomInfo.permission = (match[2] ? match[2] : "public") + (match[4] ? "+" : "");
-                    State.roomInfo.organizer = match[3];
-                    State.players = [];
-                    State.focalLength = config.focalDefault;
-                    State.apertureValue = config.apertureDefault;
-                    State.exposureIndex = config.exposureDefault;
-                    State.isVL2Enabled = false;
-
-                    // console.log(State.roomInfo);
-                    // console.log(line, match);
-                }
-            }
-            {
-                const match = line.match(/Joining or Creating Room: (.*)/);
-                if (match) {
-                    State.roomInfo.world_name = match[1];
-                    console.log(State.roomInfo);
-                    // console.log(line, match);
-                }
-            }
-            {
-                const match = line.match(/OnPlayerJoined (.*)/);
-                if (match) {
-                    State.players.push(match[1]);
-                    // console.log(State.players.toString());
-                    console.log("join", match[1]);
-                    // console.log(line, match);
-                }
-            }
-            {
-                const match = line.match(/OnPlayerLeft (.*)/);
-                if (match) {
-                    const i = State.players.indexOf(match[1]);
-                    if (i !== -1) {
-                        State.players.splice(i, 1);
-                        // console.log(State.players.toString());
-                        console.log("quit", match[1]);
-                        // console.log(line, match);
-                    }
-                }
-            }
+            // if (line != "") console.log(line);
+            this.check.forEach(f => f(line));
         });
     }
+
+    private check: Array<(line: string) => void> = [
+        (line: string) => {
+            const match = line.match(/VRCApplication: OnApplicationQuit/);
+            if (match) {
+                console.log("VRChat: Quit");
+                State.restart = true;
+            }
+        },
+        (line: string) => {
+            const match = line.match(/([0-9\.\: ]*) Log        -  \[VRC Camera\] Took screenshot to\: (.*)/);
+            if (match) {
+                const DateTime = match[1].replaceAll('.', ':');
+
+                const fpath = process.platform == "win32" ? match[2] : match[2].replaceAll('C:\\', (`${compatdata_path}/438100/pfx/drive_c/`)).replaceAll('\\', '/');
+
+                const tag: Array<MediaTag> = [];
+
+                tag.push(new MediaTag("DateTimeOriginal", DateTime));
+                tag.push(new MediaTag("CreationTime", DateTime));
+                tag.push(new MediaTag("ImageDescription", `at VRChat World ${State.roomInfo.world_name}, with ${State.players.toString()}`));
+                tag.push(new MediaTag("Description", `at VRChat World ${State.roomInfo.world_name}, with ${State.players.toString()}`));
+
+                if (State.isVL2Enabled) {
+                    tag.push(new MediaTag("Make", "logilabo"));
+                    tag.push(new MediaTag("Model", "VirtualLens2"));
+                    tag.push(new MediaTag("FocalLength", State.focalLength.toFixed(1)));
+                    if (State.apertureValue != config.apertureMin) tag.push(new MediaTag("FNumber", State.apertureValue.toFixed(1)));
+                    tag.push(new MediaTag("ExposureIndex", State.exposureIndex.toFixed(1)));
+                }
+
+                const makerNote = new MakerNotes(State.roomInfo, State.players);
+
+                this.convertImage(fpath).then((file) => {
+                    this.writeMetadata(file, tag, makerNote).then(() => {
+                        const dir = file.split(path.sep);
+                        const targetDir = config.destDir === "" ? path.dirname(file) + "/" : config.destDir + "/" + dir[dir.length - 2] + "/";
+                        if (!fs.existsSync(targetDir))
+                            fs.mkdirSync(targetDir);
+                        const dest = targetDir + path.basename(file);
+
+                        if (path.normalize(file) != path.normalize(dest))
+                            fs.copyFile(file, dest, fs.constants.COPYFILE_EXCL, (err) => {
+                                if (err) throw err;
+                                fs.rm(file, (err) => { if (err) throw err; });
+                            });
+                    });
+                }).catch(e => {
+                    console.warn(e);
+                    this.writeMetadata(fpath, tag, makerNote);
+                })
+                // console.log(line, match);
+            }
+        },
+        (line: string) => {
+            const match = line.match(/.*\[Behaviour\] Joining (wrld_.*?):(?:.*?(private|friends|hidden|group)\((.*?)\))?(~canRequestInvite)?/);
+            if (match) {
+                State.roomInfo = new RoomInfo();
+                State.roomInfo.world_id = match[1];
+                State.roomInfo.permission = (match[2] ? match[2] : "public") + (match[4] ? "+" : "");
+                State.roomInfo.organizer = match[3];
+                State.players = [];
+                State.focalLength = config.focalDefault;
+                State.apertureValue = config.apertureDefault;
+                State.exposureIndex = config.exposureDefault;
+                State.isVL2Enabled = false;
+
+                // console.log(State.roomInfo);
+                // console.log(line, match);
+            }
+        },
+        (line: string) => {
+            const match = line.match(/Joining or Creating Room: (.*)/);
+            if (match) {
+                State.roomInfo.world_name = match[1];
+                console.log(State.roomInfo);
+                // console.log(line, match);
+            }
+        },
+        (line: string) => {
+            const match = line.match(/OnPlayerJoined (.*)/);
+            if (match) {
+                State.players.push(match[1]);
+                // console.log(State.players.toString());
+                console.log("join", match[1]);
+                // console.log(line, match);
+            }
+        },
+        (line: string) => {
+            const match = line.match(/OnPlayerLeft (.*)/);
+            if (match) {
+                const i = State.players.indexOf(match[1]);
+                if (i !== -1) {
+                    State.players.splice(i, 1);
+                    // console.log(State.players.toString());
+                    console.log("quit", match[1]);
+                    // console.log(line, match);
+                }
+            }
+        }
+    ];
 
     private async writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes): Promise<void> {
         return new Promise((res, rej) => {
@@ -254,7 +215,6 @@ export default class LogReader {
                 });
         });
     }
-
     private async convertImage(file: string): Promise<string> {
         return new Promise((res, rej) => {
             if (config.compressFormat === "") { res(file); return; }

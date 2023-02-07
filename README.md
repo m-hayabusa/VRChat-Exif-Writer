@@ -113,15 +113,21 @@ VRChat-Exif-Writerのディレクトリにある、config.jsonを編集してく
 存在しない場合、一回起動すると生成されるはずです
 ```
 {
-    "focalMin": 12,        // VirtualLens2 の Min Focal Length
-    "focalMax": 300,       // VirtualLens2 の Max Focal Length 
-    "focalDefault": 50,    // VirtualLens2 の Default Focal Length 
-    "apertureMin": 22,     // VirtualLens2 の Min F Number
-    "apertureMax": 1,      // VirtualLens2 の Max F Number
-    "apertureDefault": 22, // VirtualLens2 の Default F Number
-    "exposureRange": 3,    // VirtualLens2 の Exposure Range 
-    "exposureDefault": 0,  // VirtualLens2 の Default Exposure 
-    "listenPort": 9001,    // VRChatがOSCを送信するUDPポート
+    "focalMin": 12,         // VirtualLens2 の Min Focal Length
+    "focalMax": 300,        // VirtualLens2 の Max Focal Length 
+    "focalDefault": 50,     // VirtualLens2 の Default Focal Length 
+    "apertureMin": 22,      // VirtualLens2 の Min F Number
+    "apertureMax": 1,       // VirtualLens2 の Max F Number
+    "apertureDefault": 22,  // VirtualLens2 の Default F Number
+    "exposureRange": 3,     // VirtualLens2 の Exposure Range 
+    "exposureDefault": 0,   // VirtualLens2 の Default Exposure 
+    "listenPort": 9001,     // VRChatがOSCを送信するUDPポート   
+    "destDir": "",          // 保存先ディレクトリ
+                            // "D:/VRCImage" にすると D:/VRCImage/2023-02 のようなディレクトリに保存される (空なら移動しない)
+    "compressFormat": "",   // https://sharp.pixelplumbing.com/api-output#toformat のformatに指定できる文字列 (空なら変換しない)
+                            // たとえば "jpeg" とか "webp" 、"avif" など
+    "compressOptions": {}   // https://sharp.pixelplumbing.com/api-output#toformat のoptionsに指定できるオブジェクト
+                            // たとえば { "quality": 90, "effort": 5} のように
 }
 ```
 VL2導入時に各パラメータを設定していない / VRChatの起動オプションでOSCの宛先ポートを変更していない 場合、デフォルト設定のままで問題ないはずです
