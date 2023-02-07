@@ -30,6 +30,15 @@ class Config {
         this.compressFormat = configFile?.compressFormat ? configFile?.compressFormat : "";
         this.compressOptions = configFile?.compressOptions ? configFile?.compressOptions : {};
 
+        this.linkWhiteList = configFile?.linkWhiteList ? configFile?.linkWhiteList : [
+            "*.vrchat.com",
+            "*.vrch.at",
+            "*.booth.pm",
+            "*.gumroad.com",
+            "hub.vroid.com",
+            "twitter.com"
+        ];
+
         fs.writeFileSync("./config.json", JSON.stringify(this, undefined, "    "));
     }
 
@@ -50,6 +59,8 @@ class Config {
     destDir: string;
     compressFormat: keyof sharp.FormatEnum | "";
     compressOptions: sharp.OutputOptions | sharp.JpegOptions | sharp.PngOptions | sharp.WebpOptions | sharp.AvifOptions | sharp.HeifOptions | sharp.JxlOptions | sharp.GifOptions | sharp.Jp2Options | sharp.TiffOptions;
+
+    linkWhiteList: string[];
 }
 
 export const config = new Config();

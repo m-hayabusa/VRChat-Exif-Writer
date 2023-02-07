@@ -17,7 +17,7 @@ const compatdata_path = process.platform == "win32" ? "" : process.env.STEAM_COM
 
 class HttpServer {
     private htmlResBody;
-    httpServer;
+    private httpServer;
     get port() {
         return (this.httpServer.address() as AddressInfo).port;
     }
@@ -186,6 +186,37 @@ export default class LogReader {
                     console.log("quit", match[1]);
                     // console.log(line, match);
                 }
+            }
+        },
+        (line: string) => {
+            const match = line.match(/(?:\[Video Playback\] Attempting to resolve URL 'http:\/\/localhost\/Temporary_Listen_Addresses\/openURL\/|\[YukiYukiVirtual\/OpenURL\])(.*?)'?$/);
+            if (match) {
+                const url = match[1];
+                console.log("OpenURL", url);
+
+                const hostname = (new URL(url)).hostname;
+                const allowed = config.linkWhiteList.map(
+                    (allowedHost): boolean => {
+                        if (allowedHost.startsWith("*."))
+                            return hostname.endsWith(allowedHost.substring(1)) || hostname === allowedHost.substring(2);
+                        else
+                            return hostname === allowedHost;
+                    }).includes(true);
+
+                let jump = url;
+                if (!allowed) {
+                    jump = `http://localhost:${httpServer.port}?world_id=${State.roomInfo.world_id}&world_name=${encodeURIComponent(`${State.roomInfo.world_name}`)}&url=${encodeURIComponent(url)}`;
+                }
+
+                exec(process.platform == "win32" ? `start ${jump.replaceAll(/([&\|<>\(\)\"])/g, "^$1")}` : `xdg-open "${jump}"`);
+                nodeNotifier.notify(
+                    {
+                        title: "VRChat Link Opener",
+                        message: `Opened ${url} by ${State.roomInfo.world_name}`,
+                        sound: true,
+                        wait: false,
+                    }
+                );
             }
         }
     ];
