@@ -17,6 +17,8 @@ async function checkRunning() {
                     fs.writeFileSync(`${os.tmpdir()}/VRChat-Exif-Writer.pid`, process.pid.toString());
                 }
             });
+        } else {
+            res();
         }
     });
 }
