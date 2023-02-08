@@ -233,17 +233,22 @@ export default class LogReader {
             });
             args.write(`-makernote=${Buffer.from(JSON.stringify(makerNotes)).toString('base64')}\n`);
 
-            args.close();
-
-            exiftool.write(file, {}, ["-@", argFile])
-                .then(() => {
-                    res();
-                    fs.rmSync(argFile);
-                })
-                .catch((e) => {
+            args.close((e) => {
+                if (e) {
                     console.warn(e);
-                    rej();
-                });
+                    rej(e);
+                }
+
+                exiftool.write(file, {}, ["-@", argFile])
+                    .then(() => {
+                        res();
+                        fs.rmSync(argFile);
+                    })
+                    .catch((e) => {
+                        console.warn(e);
+                        rej();
+                    });
+            });
         });
     }
     private async convertImage(file: string): Promise<string> {
