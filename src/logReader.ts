@@ -5,6 +5,7 @@ import { exiftool } from 'exiftool-vendored';
 
 import { State } from './state';
 import { config } from './config';
+import Misskey from './misskey';
 import { MediaTag, RoomInfo, MakerNotes } from './tags';
 import sharp from 'sharp';
 
@@ -82,12 +83,14 @@ export default class LogReader {
 
                 const fpath = process.platform == "win32" ? match[2] : match[2].replaceAll('C:\\', (`${compatdata_path}/438100/pfx/drive_c/`)).replaceAll('\\', '/');
 
+                const description = `at VRChat World ${State.roomInfo.world_name}, with ${State.players.toString()}`;
+
                 const tag: Array<MediaTag> = [];
 
                 tag.push(new MediaTag("DateTimeOriginal", DateTime));
                 tag.push(new MediaTag("CreationTime", DateTime));
-                tag.push(new MediaTag("ImageDescription", `at VRChat World ${State.roomInfo.world_name}, with ${State.players.toString()}`));
-                tag.push(new MediaTag("Description", `at VRChat World ${State.roomInfo.world_name}, with ${State.players.toString()}`));
+                tag.push(new MediaTag("ImageDescription", description));
+                tag.push(new MediaTag("Description", description));
 
                 if (State.isVL2Enabled) {
                     tag.push(new MediaTag("Make", "logilabo"));
@@ -110,8 +113,12 @@ export default class LogReader {
                         if (path.normalize(file) != path.normalize(dest))
                             fs.copyFile(file, dest, fs.constants.COPYFILE_EXCL, (err) => {
                                 if (err) throw err;
+                                Misskey.upload(dest, description);
                                 fs.rm(file, (err) => { if (err) throw err; });
                             });
+                        else
+                            Misskey.upload(dest, description);
+
                     });
                 }).catch(e => {
                     console.warn(e);

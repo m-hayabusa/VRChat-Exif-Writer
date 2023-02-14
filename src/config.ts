@@ -30,6 +30,10 @@ class Config {
         this.compressFormat = configFile?.compressFormat ? configFile?.compressFormat : "";
         this.compressOptions = configFile?.compressOptions ? configFile?.compressOptions : {};
 
+        this.misskeyInstance = configFile?.misskeyInstance ? configFile?.misskeyInstance : "";
+        this.misskeyToken = configFile?.misskeyToken ? configFile?.misskeyToken : "";
+        this.misskeyDir = configFile?.misskeyDir ? configFile?.misskeyDir : "VRChat";
+
         fs.writeFileSync("./config.json", JSON.stringify(this, undefined, "    "));
     }
 
@@ -50,6 +54,10 @@ class Config {
     destDir: string;
     compressFormat: keyof sharp.FormatEnum | "";
     compressOptions: sharp.OutputOptions | sharp.JpegOptions | sharp.PngOptions | sharp.WebpOptions | sharp.AvifOptions | sharp.HeifOptions | sharp.JxlOptions | sharp.GifOptions | sharp.Jp2Options | sharp.TiffOptions;
+
+    misskeyInstance: string;
+    misskeyToken: string;
+    misskeyDir: string;
 }
 
 export const config = new Config();
