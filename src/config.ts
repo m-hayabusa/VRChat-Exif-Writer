@@ -39,6 +39,14 @@ class Config {
             "twitter.com"
         ];
 
+        this.misskeyInstance = configFile?.misskeyInstance ? configFile?.misskeyInstance : "";
+        this.misskeyToken = configFile?.misskeyToken ? configFile?.misskeyToken : "";
+        this.misskeyDir = configFile?.misskeyDir ? configFile?.misskeyDir : "VRChat";
+
+        fs.writeFileSync("./config.json", JSON.stringify(this, undefined, "    "));
+    }
+
+    public save() {
         fs.writeFileSync("./config.json", JSON.stringify(this, undefined, "    "));
     }
 
@@ -61,6 +69,9 @@ class Config {
     compressOptions: sharp.OutputOptions | sharp.JpegOptions | sharp.PngOptions | sharp.WebpOptions | sharp.AvifOptions | sharp.HeifOptions | sharp.JxlOptions | sharp.GifOptions | sharp.Jp2Options | sharp.TiffOptions;
 
     linkWhiteList: string[];
+    misskeyInstance: string;
+    misskeyToken: string;
+    misskeyDir: string;
 }
 
 export const config = new Config();

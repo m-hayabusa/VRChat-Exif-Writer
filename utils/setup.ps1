@@ -125,6 +125,9 @@ if ($isAutoStart) {
 }
 
 Write-Host "`nインストールされたフォルダは スタートメニュー「VRChat-Exif-Writerのフォルダを開く」から開くことができます。"
+
+npm run setup
+
 Write-Host "セットアップが終了しました。`n更新は、ショートカット「setup」から実行できます。"
 
 if($null -eq $task) {
