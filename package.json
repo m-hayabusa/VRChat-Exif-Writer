@@ -10,6 +10,7 @@
   "main": "main.js",
   "scripts": {
     "start": "node built/main.js",
+    "setup": "node built/setup.js",
     "tsc": "tsc",
     "unregist": "powershell -C \"Start-Process powershell -Verb runAs -ArgumentList @('-ExecutionPolicy','Unrestricted','-C',\"$((Get-Location).Path + '\\utils\\unregist.ps1')\")\"",
     "regist": "powershell -C \"Start-Process powershell -Verb runAs -ArgumentList @('-ExecutionPolicy','Unrestricted','-C',\"$((Get-Location).Path + '\\utils\\regist.ps1')\")\""
@@ -21,12 +22,14 @@
     "node-osc": "^8.0.3",
     "sharp": "^0.31.3",
     "tail": "^2.2.4",
-    "typescript": "^4.7.4"
+    "typescript": "^4.7.4",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/node": "^18.0.3",
     "@types/node-osc": "^6.0.0",
     "@types/sharp": "^0.31.1",
-    "@types/tail": "^2.2.1"
+    "@types/tail": "^2.2.1",
+    "@types/uuid": "^9.0.0"
   }
 }

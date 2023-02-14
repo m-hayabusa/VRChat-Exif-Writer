@@ -37,6 +37,10 @@ class Config {
         fs.writeFileSync("./config.json", JSON.stringify(this, undefined, "    "));
     }
 
+    public save() {
+        fs.writeFileSync("./config.json", JSON.stringify(this, undefined, "    "));
+    }
+
     focalMin: number;
     focalMax: number;
     focalDefault: number;
