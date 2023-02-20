@@ -135,7 +135,8 @@ export default class LogReader {
                         if (path.normalize(file) != path.normalize(dest))
                             fs.copyFile(file, dest, fs.constants.COPYFILE_EXCL, (err) => {
                                 if (err) throw err;
-                                Misskey.upload(dest, description);
+                                if (config.misskeyInstance && config.misskeyToken)
+                                    Misskey.upload(dest, description);
                                 fs.rm(file, (err) => { if (err) throw err; });
                             });
                         else
