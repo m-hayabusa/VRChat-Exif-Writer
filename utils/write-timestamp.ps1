@@ -15,7 +15,7 @@ $Pathes | ForEach-Object {
         $mon = $null
         $source = $null
 
-        if ($_ -match 'VRChat[_ ](?:(?:.*)_)?(\d+)[- ](\d+)[- ](\d+)[_ ](\d+)[- ](\d+)[- ](\d+).*.(?:(?:png)|(?:jpg))$') {
+        if ($_ -match 'VRChat[_ ](?:(?:.*)_)?(\d+)[- ](\d+)[- ](\d+)[_ ](\d+)[- ](\d+)[- ](\d+).*.(?:(?:png)|(?:jpg)|(?:heic)|(?:heif))$') {
             $matched = "image"
             $newDate = "$($Matches.1):$($Matches.2):$($Matches.3) $($Matches.4):$($Matches.5):$($Matches.6)"
             $year = $Matches.1
@@ -60,11 +60,11 @@ $Pathes | ForEach-Object {
         }
 
         if ($matched -eq "image") {
-            $datetime = $(&${path_to_exiftool} -EXIF:DateTimeOriginal $_.FullName -charset utf8)
+            $datetime = $(&${path_to_exiftool} -XMP:DateTimeOriginal $_.FullName -charset utf8)
             if ($datetime -eq $null) {
                 $newDate = $newDate + "+09:00"
                 Write-host "WRITE" $_ $newDate
-                &${path_to_exiftool} -overwrite_original -EXIF:DateTimeOriginal=$newDate $_.FullName -charset utf8 > $null
+                &${path_to_exiftool} -overwrite_original -XMP:DateTimeOriginal="$newDate" -DateTimeOriginal="$newDate" -CreationTime="$newDate" $_.FullName -charset utf8 > $null
             } else {
                 Write-Host "     " $_
             }
@@ -72,14 +72,14 @@ $Pathes | ForEach-Object {
             Write-Host "     " $_
         }
 
-        if ($destDirRoot -ne $null -and $matched -ne $null) {
-            if ($mon.Length -eq 1) {
-                $mon = "0$mon"
-            }
-            $destDir = "$destDirRoot\$year-$mon\"
+        # if ($destDirRoot -ne $null -and $matched -ne $null) {
+        #     if ($mon.Length -eq 1) {
+        #         $mon = "0$mon"
+        #     }
+        #     $destDir = "$destDirRoot\$year-$mon\"
 
-            New-Item -ItemType Directory -Force -Path $destDir > $null
-            Move-Item -Path $_ -Destination $destDir
-        }
+        #     New-Item -ItemType Directory -Force -Path $destDir > $null
+        #     Move-Item -Path $_ -Destination $destDir
+        # }
     }
 }
