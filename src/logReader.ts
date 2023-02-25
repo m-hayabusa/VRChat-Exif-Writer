@@ -86,7 +86,13 @@ export default class LogReader {
 
         this.tail.on("line", (line: string) => {
             // if (line != "") console.log(line);
-            this.check.forEach(f => f(line));
+            this.check.forEach(f => {
+                try {
+                    f(line);
+                } catch (e) {
+                    console.warn(e);
+                }
+            });
         });
     }
 
@@ -117,7 +123,7 @@ export default class LogReader {
                 if (State.isVL2Enabled) {
                     tag.push(new MediaTag("Make", "logilabo"));
                     tag.push(new MediaTag("Model", "VirtualLens2"));
-                    tag.push(new MediaTag("FocalLength", State.focalLength.toFixed(1)));
+                    if (State.focalLength != Infinity) tag.push(new MediaTag("FocalLength", State.focalLength.toFixed(1)));
                     if (State.apertureValue != config.apertureMin) tag.push(new MediaTag("FNumber", State.apertureValue.toFixed(1)));
                     tag.push(new MediaTag("ExposureIndex", State.exposureIndex.toFixed(1)));
                 }
