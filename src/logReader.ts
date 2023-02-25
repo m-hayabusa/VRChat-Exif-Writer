@@ -63,7 +63,13 @@ export default class LogReader {
 
         this.tail.on("line", (line: string) => {
             // if (line != "") console.log(line);
-            this.check.forEach(f => f(line));
+            this.check.forEach(f => {
+                try {
+                    f(line);
+                } catch (e) {
+                    console.warn(e);
+                }
+            });
         });
     }
 
