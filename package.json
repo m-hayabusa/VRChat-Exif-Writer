@@ -17,14 +17,14 @@
   "author": "m-hayabusa (https://mewl.me/@mewl)",
   "license": "MIT",
   "dependencies": {
-    "exiftool-vendored": "^19.0.0",
+    "exiftool-vendored": "^21.2.0",
     "node-osc": "^8.0.3",
     "sharp": "^0.31.3",
-    "tail": "^2.2.4",
-    "typescript": "^4.7.4"
+    "tail": "^2.2.6",
+    "typescript": "^4.9.5"
   },
   "devDependencies": {
-    "@types/node": "^18.0.3",
+    "@types/node": "^18.14.6",
     "@types/node-osc": "^6.0.0",
     "@types/sharp": "^0.31.1",
     "@types/tail": "^2.2.1"
