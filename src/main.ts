@@ -9,7 +9,7 @@ async function checkRunning() {
     return new Promise<void>(res => {
         if (fs.existsSync(`${os.tmpdir()}/VRChat-Exif-Writer.pid`)) {
             const pid = parseInt(fs.readFileSync(`${os.tmpdir()}/VRChat-Exif-Writer.pid`).toString());
-            exec(process.platform == "win32" ? `powershell.exe -C \"Get-Process -Id ${pid}\"` : `ps --no-headers -p ${pid}`, (error, stdout, stderr) => {
+            exec(process.platform == "win32" ? `pwsh.exe -C \"Get-Process -Id ${pid}\"` : `ps --no-headers -p ${pid}`, (error, stdout, stderr) => {
                 if (error?.code != 1) {
                     throw new Error("Found Another Process");
                 } else {
@@ -34,7 +34,7 @@ async function main() {
 
     osc.listen();
     const waitLoop = setInterval(() => {
-        exec(process.platform == "win32" ? "powershell.exe -C \"(Get-Process -Name VRChat | Measure-Object).Count\"" : "ps -A|grep VRChat|wc -l", (error, stdout, stderr) => {
+        exec(process.platform == "win32" ? "pwsh.exe -C \"(Get-Process -Name VRChat | Measure-Object).Count\"" : "ps -A|grep VRChat|wc -l", (error, stdout, stderr) => {
             if (parseInt(stdout) >= 1 && !State.restart) {
                 if (!running) {
                     running = true;
