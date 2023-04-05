@@ -30,6 +30,8 @@ async function main() {
     const osc = new OscServer();
     let running = false;
 
+    await log.read();
+
     osc.listen();
     const waitLoop = setInterval(() => {
         exec(process.platform == "win32" ? "powershell.exe -C \"(Get-Process -Name VRChat | Measure-Object).Count\"" : "ps -A|grep VRChat|wc -l", (error, stdout, stderr) => {
@@ -37,7 +39,7 @@ async function main() {
                 if (!running) {
                     running = true;
                     console.log("VRChat: Start");
-                    log.open();
+                    log.watch();
                 }
             } else {
                 running = false;

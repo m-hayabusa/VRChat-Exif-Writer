@@ -7,6 +7,7 @@ import { exec } from 'child_process';
 import * as http from "http";
 import { AddressInfo } from 'net';
 import sharp from 'sharp';
+import * as readline from 'node:readline/promises';
 
 import { State } from './state';
 import { config } from './config';
@@ -52,7 +53,38 @@ export default class LogReader {
         fs.lstat(this.logFile, () => { });
     }
 
-    open(force: boolean = false) {
+    async read() {
+        const logDir = process.platform == "win32" ? `${process.env.APPDATA}\\..\\LocalLow\\VRChat\\VRChat\\` : `${compatdata_path}/438100/pfx/drive_c/users/steamuser/AppData/LocalLow/VRChat/VRChat/`;
+
+        const logFiles = (fs.readdirSync(logDir)
+            .filter(e => e.startsWith("output_log_"))
+            .map(e => ({ f: e, t: fs.lstatSync(logDir + e).mtime.getTime() }))
+            .sort((a, b) => a.t - b.t))
+            .map(e => e.f);
+
+        for (const logFile of logFiles) {
+            await new Promise<void>((res, rej)=>{
+                const rl = readline.createInterface(
+                    fs.createReadStream(logDir + logFile)
+                );
+                rl.addListener("line", (line: string) => {
+                    // if (line != "") console.log(line);
+                    this.check.forEach(f => {
+                        try {
+                            f(line);
+                        } catch (e) {
+                            console.warn(e);
+                        }
+                    });
+                });
+                rl.addListener("close", ()=>{
+                    res();
+                });
+            });
+        }
+    }
+
+    watch(force: boolean = false) {
         const logDir = process.platform == "win32" ? `${process.env.APPDATA}\\..\\LocalLow\\VRChat\\VRChat\\` : `${compatdata_path}/438100/pfx/drive_c/users/steamuser/AppData/LocalLow/VRChat/VRChat/`;
         const logFile = logDir + (fs.readdirSync(logDir)
             .filter(e => e.startsWith("output_log_"))
@@ -67,7 +99,7 @@ export default class LogReader {
 
         if (!this.logReopenLoop) {
             this.logReopenLoop = setInterval(() => {
-                this.open(false);
+                this.watch(false);
             }, 5000);
         }
 
@@ -148,10 +180,10 @@ export default class LogReader {
                         else
                             Misskey.upload(dest, description);
 
-                    });
+                    }).catch(e=>{console.warn(e)});
                 }).catch(e => {
                     console.warn(e);
-                    this.writeMetadata(fpath, tag, makerNote);
+                    this.writeMetadata(fpath, tag, makerNote).catch(e=>{console.warn(e)});
                 })
                 // console.log(line, match);
             }
@@ -237,6 +269,11 @@ export default class LogReader {
 
     private async writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes): Promise<void> {
         return new Promise((res, rej) => {
+            if (!fs.existsSync(file)){
+                rej("file not found");
+                return;
+            }
+
             const argFile = path.dirname(file) + path.sep + path.basename(file) + ".tags.txt";
             console.log(argFile);
             const args = fs.createWriteStream(argFile);
@@ -252,7 +289,6 @@ export default class LogReader {
                     console.warn(e);
                     rej(e);
                 }
-
                 exiftool.write(file, {}, ["-@", argFile])
                     .then(() => {
                         res();
@@ -267,6 +303,10 @@ export default class LogReader {
     }
     private async convertImage(file: string): Promise<string> {
         return new Promise((res, rej) => {
+            if (!fs.existsSync(file)){
+                rej("file not found");
+                return;
+            }
             if (config.compressFormat === "") { res(file); return; }
             const dest = file.replace(/.png$/, '.' + config.compressFormat);
             sharp(file)
