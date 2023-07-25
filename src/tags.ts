@@ -7,7 +7,7 @@ export class MediaTag {
         this.data = data;
     }
     toString(): string {
-        return `${this.prefix}:${this.tag}=${this.data}`
+        return `${this.prefix}:${this.tag}=${this.data}`;
     }
 }
 

@@ -1,9 +1,9 @@
 import * as fsP from "fs/promises";
 import * as fs from "fs";
 import sharp from "sharp";
-import { exiftool } from 'exiftool-vendored';
+import { exiftool } from "exiftool-vendored";
 import { config } from "./config";
-import path from 'path';
+import path from "path";
 
 async function findFile(dir: string) {
     for (const child of await fsP.readdir(dir)) {
@@ -25,7 +25,6 @@ async function findFile(dir: string) {
 
 async function convertImage(file: string): Promise<string> {
     return new Promise(async (res, rej) => {
-
         if (config.compressFormat === "" || path.extname(file) === "." + config.compressFormat) {
             await fsP.copyFile(file, "test/" + path.basename(file));
             res("test/" + path.basename(file));
@@ -56,17 +55,17 @@ async function writeMetadata(file: string): Promise<void> {
         console.log(`${r[1]}:${r[2]}:${r[3]} ${r[4]}:${r[5]}:${r[6]}`);
         res();
 
-        exiftool.write(file, {}, [
-            "-overwrite_original",
-            `-DateTimeOriginal=${r[1]}:${r[2]}:${r[3]} ${r[4]}:${r[5]}:${r[6]}`
-        ]).then((r) => {
-            console.log(r);
-            res();
-        }).catch((e) => {
-            console.warn(e);
-            rej();
-        });
+        exiftool
+            .write(file, {}, ["-overwrite_original", `-DateTimeOriginal=${r[1]}:${r[2]}:${r[3]} ${r[4]}:${r[5]}:${r[6]}`])
+            .then((r) => {
+                console.log(r);
+                res();
+            })
+            .catch((e) => {
+                console.warn(e);
+                rej();
+            });
     });
 }
 
-findFile("C:\\Users\\hayabusa\\Pictures\\VRChat")
+findFile("C:\\Users\\hayabusa\\Pictures\\VRChat");

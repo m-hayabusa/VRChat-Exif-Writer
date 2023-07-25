@@ -1,21 +1,25 @@
-import { Tail } from 'tail';
-import * as fs from 'fs';
-import path from 'path';
-import { exiftool } from 'exiftool-vendored';
-import nodeNotifier from 'node-notifier';
-import { exec } from 'child_process';
+import { Tail } from "tail";
+import * as fs from "fs";
+import path from "path";
+import { exiftool } from "exiftool-vendored";
+import nodeNotifier from "node-notifier";
+import { exec } from "child_process";
 import * as http from "http";
-import { AddressInfo } from 'net';
-import sharp from 'sharp';
-import * as readline from 'node:readline/promises';
+import { AddressInfo } from "net";
+import sharp from "sharp";
+import * as readline from "node:readline/promises";
 
-import { State } from './state';
-import { config } from './config';
-import Misskey from './misskey';
-import { MediaTag, RoomInfo, MakerNotes } from './tags';
+import { State } from "./state";
+import { config } from "./config";
+import Misskey from "./misskey";
+import { MediaTag, RoomInfo, MakerNotes } from "./tags";
 
-const compatdata_path = process.platform == "win32" ? "" : process.env.STEAM_COMPAT_DATA_PATH == undefined ? `${process.env["HOME"]}/.local/share/Steam/steamapps/compatdata/` : `${process.env.STEAM_COMPAT_DATA_PATH}`
-
+const compatdata_path =
+    process.platform == "win32"
+        ? ""
+        : process.env.STEAM_COMPAT_DATA_PATH == undefined
+            ? `${process.env["HOME"]}/.local/share/Steam/steamapps/compatdata/`
+            : `${process.env.STEAM_COMPAT_DATA_PATH}`;
 
 class HttpServer {
     private htmlResBody;
@@ -24,9 +28,13 @@ class HttpServer {
         return (this.httpServer.address() as AddressInfo).port;
     }
     constructor() {
-        this.htmlResBody = fs.readFileSync("./cushion.html", { encoding: "utf8" });
+        this.htmlResBody = fs.readFileSync("./cushion.html", {
+            encoding: "utf8",
+        });
         this.httpServer = http.createServer((req, res) => {
-            res.writeHead(200, { "Content-Type": "text/html" });
+            res.writeHead(200, {
+                "Content-Type": "text/html",
+            });
             res.end(this.htmlResBody);
         });
         this.httpServer.listen();
@@ -54,22 +62,27 @@ export default class LogReader {
     }
 
     async read() {
-        const logDir = process.platform == "win32" ? `${process.env.APPDATA}\\..\\LocalLow\\VRChat\\VRChat\\` : `${compatdata_path}/438100/pfx/drive_c/users/steamuser/AppData/LocalLow/VRChat/VRChat/`;
+        const logDir =
+            process.platform == "win32"
+                ? `${process.env.APPDATA}\\..\\LocalLow\\VRChat\\VRChat\\`
+                : `${compatdata_path}/438100/pfx/drive_c/users/steamuser/AppData/LocalLow/VRChat/VRChat/`;
 
-        const logFiles = (fs.readdirSync(logDir)
-            .filter(e => e.startsWith("output_log_"))
-            .map(e => ({ f: e, t: fs.lstatSync(logDir + e).mtime.getTime() }))
-            .sort((a, b) => a.t - b.t))
-            .map(e => e.f);
+        const logFiles = fs
+            .readdirSync(logDir)
+            .filter((e) => e.startsWith("output_log_"))
+            .map((e) => ({
+                f: e,
+                t: fs.lstatSync(logDir + e).mtime.getTime(),
+            }))
+            .sort((a, b) => a.t - b.t)
+            .map((e) => e.f);
 
         for (const logFile of logFiles) {
-            await new Promise<void>((res, rej)=>{
-                const rl = readline.createInterface(
-                    fs.createReadStream(logDir + logFile)
-                );
+            await new Promise<void>((res, rej) => {
+                const rl = readline.createInterface(fs.createReadStream(logDir + logFile));
                 rl.addListener("line", (line: string) => {
                     // if (line != "") console.log(line);
-                    this.check.forEach(f => {
+                    this.check.forEach((f) => {
                         try {
                             f(line);
                         } catch (e) {
@@ -77,7 +90,7 @@ export default class LogReader {
                         }
                     });
                 });
-                rl.addListener("close", ()=>{
+                rl.addListener("close", () => {
                     res();
                 });
             });
@@ -85,11 +98,20 @@ export default class LogReader {
     }
 
     watch(force: boolean = false) {
-        const logDir = process.platform == "win32" ? `${process.env.APPDATA}\\..\\LocalLow\\VRChat\\VRChat\\` : `${compatdata_path}/438100/pfx/drive_c/users/steamuser/AppData/LocalLow/VRChat/VRChat/`;
-        const logFile = logDir + (fs.readdirSync(logDir)
-            .filter(e => e.startsWith("output_log_"))
-            .map(e => ({ f: e, t: fs.lstatSync(logDir + e).mtime.getTime() }))
-            .sort((a, b) => b.t - a.t))[0].f;
+        const logDir =
+            process.platform == "win32"
+                ? `${process.env.APPDATA}\\..\\LocalLow\\VRChat\\VRChat\\`
+                : `${compatdata_path}/438100/pfx/drive_c/users/steamuser/AppData/LocalLow/VRChat/VRChat/`;
+        const logFile =
+            logDir +
+            fs
+                .readdirSync(logDir)
+                .filter((e) => e.startsWith("output_log_"))
+                .map((e) => ({
+                    f: e,
+                    t: fs.lstatSync(logDir + e).mtime.getTime(),
+                }))
+                .sort((a, b) => b.t - a.t)[0].f;
 
         if (this.logFile === logFile && !force) {
             return;
@@ -113,12 +135,12 @@ export default class LogReader {
         this.tail = new Tail(this.logFile);
 
         this.tail.on("error", function (error) {
-            console.log('ERROR: ', error);
+            console.log("ERROR: ", error);
         });
 
         this.tail.on("line", (line: string) => {
             // if (line != "") console.log(line);
-            this.check.forEach(f => {
+            this.check.forEach((f) => {
                 try {
                     f(line);
                 } catch (e) {
@@ -139,9 +161,10 @@ export default class LogReader {
         (line: string) => {
             const match = line.match(/([0-9\.\: ]*) Log        -  \[VRC Camera\] Took screenshot to\: (.*)/);
             if (match) {
-                const DateTime = match[1].replaceAll('.', ':');
+                const DateTime = match[1].replaceAll(".", ":");
 
-                const fpath = process.platform == "win32" ? match[2] : match[2].replaceAll('C:\\', (`${compatdata_path}/438100/pfx/drive_c/`)).replaceAll('\\', '/');
+                const fpath =
+                    process.platform == "win32" ? match[2] : match[2].replaceAll("C:\\", `${compatdata_path}/438100/pfx/drive_c/`).replaceAll("\\", "/");
 
                 const description = `at VRChat World ${State.roomInfo.world_name}, with ${State.players.toString()}`;
 
@@ -162,29 +185,35 @@ export default class LogReader {
 
                 const makerNote = new MakerNotes(State.roomInfo, State.players);
 
-                this.convertImage(fpath).then((file) => {
-                    this.writeMetadata(file, tag, makerNote).then(() => {
-                        const dir = file.split(path.sep);
-                        const targetDir = config.destDir === "" ? path.dirname(file) + "/" : config.destDir + "/" + dir[dir.length - 2] + "/";
-                        if (!fs.existsSync(targetDir))
-                            fs.mkdirSync(targetDir);
-                        const dest = targetDir + path.basename(file);
+                this.convertImage(fpath)
+                    .then((file) => {
+                        this.writeMetadata(file, tag, makerNote)
+                            .then(() => {
+                                const dir = file.split(path.sep);
+                                const targetDir = config.destDir === "" ? path.dirname(file) + "/" : config.destDir + "/" + dir[dir.length - 2] + "/";
+                                if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir);
+                                const dest = targetDir + path.basename(file);
 
-                        if (path.normalize(file) != path.normalize(dest))
-                            fs.copyFile(file, dest, fs.constants.COPYFILE_EXCL, (err) => {
-                                if (err) throw err;
-                                if (config.misskeyInstance && config.misskeyToken)
-                                    Misskey.upload(dest, description);
-                                fs.rm(file, (err) => { if (err) throw err; });
+                                if (path.normalize(file) != path.normalize(dest))
+                                    fs.copyFile(file, dest, fs.constants.COPYFILE_EXCL, (err) => {
+                                        if (err) throw err;
+                                        if (config.misskeyInstance && config.misskeyToken) Misskey.upload(dest, description);
+                                        fs.rm(file, (err) => {
+                                            if (err) throw err;
+                                        });
+                                    });
+                                else Misskey.upload(dest, description);
+                            })
+                            .catch((e) => {
+                                console.warn(e);
                             });
-                        else
-                            Misskey.upload(dest, description);
-
-                    }).catch(e=>{console.warn(e)});
-                }).catch(e => {
-                    console.warn(e);
-                    this.writeMetadata(fpath, tag, makerNote).catch(e=>{console.warn(e)});
-                })
+                    })
+                    .catch((e) => {
+                        console.warn(e);
+                        this.writeMetadata(fpath, tag, makerNote).catch((e) => {
+                            console.warn(e);
+                        });
+                    });
                 // console.log(line, match);
             }
         },
@@ -235,41 +264,79 @@ export default class LogReader {
             }
         },
         (line: string) => {
-            const match = line.match(/(?:\[Video Playback\] Attempting to resolve URL 'http:\/\/localhost\/Temporary_Listen_Addresses\/openURL\/|\[YukiYukiVirtual\/OpenURL\])(.*?)'?$/);
+            const match = line.match(
+                /(?:\[Video Playback\] Attempting to resolve URL 'http:\/\/localhost\/Temporary_Listen_Addresses\/openURL\/|\[YukiYukiVirtual\/OpenURL\])(.*?)'?$/
+            );
             if (match) {
                 const url = match[1];
                 console.log("OpenURL", url);
 
-                const hostname = (new URL(url)).hostname;
-                const allowed = config.linkWhiteList.map(
-                    (allowedHost): boolean => {
-                        if (allowedHost.startsWith("*."))
-                            return hostname.endsWith(allowedHost.substring(1)) || hostname === allowedHost.substring(2);
-                        else
-                            return hostname === allowedHost;
-                    }).includes(true);
+                const hostname = new URL(url).hostname;
+                const allowed = config.linkWhiteList
+                    .map((allowedHost): boolean => {
+                        if (allowedHost.startsWith("*.")) return hostname.endsWith(allowedHost.substring(1)) || hostname === allowedHost.substring(2);
+                        else return hostname === allowedHost;
+                    })
+                    .includes(true);
 
                 let jump = url;
                 if (!allowed) {
-                    jump = `http://localhost:${httpServer.port}?world_id=${State.roomInfo.world_id}&world_name=${encodeURIComponent(`${State.roomInfo.world_name}`)}&url=${encodeURIComponent(url)}`;
+                    jump = `http://localhost:${httpServer.port}?world_id=${State.roomInfo.world_id}&world_name=${encodeURIComponent(
+                        `${State.roomInfo.world_name}`
+                    )}&url=${encodeURIComponent(url)}`;
                 }
 
                 exec(process.platform == "win32" ? `start ${jump.replaceAll(/([&\|<>\(\)\"])/g, "^$1")}` : `xdg-open "${jump}"`);
-                nodeNotifier.notify(
-                    {
-                        title: "VRChat Link Opener",
-                        message: `Opened ${url} by ${State.roomInfo.world_name}`,
-                        sound: true,
-                        wait: false,
-                    }
-                );
+                nodeNotifier.notify({
+                    title: "VRChat Link Opener",
+                    message: `Opened ${url} by ${State.roomInfo.world_name}`,
+                    sound: true,
+                    wait: false,
+                });
             }
-        }
+        },
+        (line: string) => {
+            const match = line.match(/^([0-9\.\: ]*) Log        -  (?:\[Video Playback\] Attempting to resolve URL ')(.*?)'?$/);
+            if (match) {
+                const url = new URL(match[2]);
+
+                function checkLink(url: URL): string | undefined {
+                    const rejectList = [
+                        "localhost",
+                        "advirth-seturl.d-c.llc",
+                        "esperecyan.github.io",
+                        "dktsak5gftmtr.cloudfront.net",
+                        "dotchain.sakura.ne.jp",
+                        "world-api.vr-koukoku.com",
+                    ];
+                    const proxyList = ["t-ne.x0.to", "nextnex.com"];
+                    if (rejectList.includes(url.hostname)) {
+                        return;
+                    }
+                    if (proxyList.includes(url.hostname)) {
+                        const dest = url.searchParams.get("url");
+                        if (dest) {
+                            return checkLink(new URL(dest));
+                        }
+                    }
+                    if (url.hostname === "www.youtube.com" && url.pathname === "/watch") {
+                        return "https://youtu.be/" + url.searchParams.get("v");
+                    }
+                    if (url.hostname.endsWith("dmc.nico")) {
+                        return "https://nico.ms/" + url.pathname.match(/nicovideo-(sm\d*)/)?.[1];
+                    }
+                    return url.toString();
+                }
+
+                const link = checkLink(url);
+                if (link) console.log(match[1], State.roomInfo.world_name + " " + link);
+            }
+        },
     ];
 
     private async writeMetadata(file: string, data: MediaTag[], makerNotes?: MakerNotes): Promise<void> {
         return new Promise((res, rej) => {
-            if (!fs.existsSync(file)){
+            if (!fs.existsSync(file)) {
                 rej("file not found");
                 return;
             }
@@ -279,17 +346,18 @@ export default class LogReader {
             const args = fs.createWriteStream(argFile);
 
             args.write("-overwrite_original\n");
-            data.forEach(e => {
+            data.forEach((e) => {
                 args.write(e.toString() + "\n");
             });
-            args.write(`-makernote=${Buffer.from(JSON.stringify(makerNotes)).toString('base64')}\n`);
+            args.write(`-makernote=${Buffer.from(JSON.stringify(makerNotes)).toString("base64")}\n`);
 
             args.close((e) => {
                 if (e) {
                     console.warn(e);
                     rej(e);
                 }
-                exiftool.write(file, {}, ["-@", argFile])
+                exiftool
+                    .write(file, {}, ["-@", argFile])
                     .then(() => {
                         res();
                         fs.rmSync(argFile);
@@ -303,12 +371,15 @@ export default class LogReader {
     }
     private async convertImage(file: string): Promise<string> {
         return new Promise((res, rej) => {
-            if (!fs.existsSync(file)){
+            if (!fs.existsSync(file)) {
                 rej("file not found");
                 return;
             }
-            if (config.compressFormat === "") { res(file); return; }
-            const dest = file.replace(/.png$/, '.' + config.compressFormat);
+            if (config.compressFormat === "") {
+                res(file);
+                return;
+            }
+            const dest = file.replace(/.png$/, "." + config.compressFormat);
             sharp(file)
                 .toFormat(config.compressFormat, config.compressOptions)
                 .toFile(dest)
@@ -316,10 +387,9 @@ export default class LogReader {
                     fs.rm(file, (e) => {
                         if (e) rej(e);
                         else res(dest);
-                    })
+                    });
                 })
                 .catch((e: any) => rej(e));
         });
     }
 }
-

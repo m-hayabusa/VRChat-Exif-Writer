@@ -1,9 +1,8 @@
-import { Server } from 'node-osc';
-import { State } from './state';
-import { config } from './config';
+import { Server } from "node-osc";
+import { State } from "./state";
+import { config } from "./config";
 
 export default class OscServer {
-
     oscServer: Server | undefined;
 
     close() {
@@ -14,7 +13,7 @@ export default class OscServer {
             // console.log('OSC Server is listening');
         });
 
-        this.oscServer.on('message', (msg) => {
+        this.oscServer.on("message", (msg) => {
             const path = msg[0];
             const val = parseFloat(msg[1] as string);
 
@@ -27,10 +26,8 @@ export default class OscServer {
             }
 
             if (path === "/avatar/parameters/VirtualLens2_Zoom") {
-                if (val === 0)
-                    State.focalLength = Infinity;
-                else
-                    State.focalLength = config.focalMin * Math.exp(val * Math.log(config.focalMax / config.focalMin));
+                if (val === 0) State.focalLength = Infinity;
+                else State.focalLength = config.focalMin * Math.exp(val * Math.log(config.focalMax / config.focalMin));
             }
 
             if (path === "/avatar/parameters/VirtualLens2_Aperture") {

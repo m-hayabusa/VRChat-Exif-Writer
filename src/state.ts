@@ -1,5 +1,5 @@
-import { config } from './config';
-import { RoomInfo } from './tags';
+import { config } from "./config";
+import { RoomInfo } from "./tags";
 
 export class State {
     static isVL2Enabled = false;

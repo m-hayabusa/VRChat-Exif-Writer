@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import sharp from 'sharp';
+import * as fs from "fs";
+import sharp from "sharp";
 
 class Config {
     constructor() {
@@ -30,14 +30,9 @@ class Config {
         this.compressFormat = configFile?.compressFormat ? configFile?.compressFormat : "";
         this.compressOptions = configFile?.compressOptions ? configFile?.compressOptions : {};
 
-        this.linkWhiteList = configFile?.linkWhiteList ? configFile?.linkWhiteList : [
-            "*.vrchat.com",
-            "*.vrch.at",
-            "*.booth.pm",
-            "*.gumroad.com",
-            "hub.vroid.com",
-            "twitter.com"
-        ];
+        this.linkWhiteList = configFile?.linkWhiteList
+            ? configFile?.linkWhiteList
+            : ["*.vrchat.com", "*.vrch.at", "*.booth.pm", "*.gumroad.com", "hub.vroid.com", "twitter.com"];
 
         this.misskeyInstance = configFile?.misskeyInstance ? configFile?.misskeyInstance : "";
         this.misskeyToken = configFile?.misskeyToken ? configFile?.misskeyToken : "";
@@ -66,7 +61,17 @@ class Config {
 
     destDir: string;
     compressFormat: keyof sharp.FormatEnum | "";
-    compressOptions: sharp.OutputOptions | sharp.JpegOptions | sharp.PngOptions | sharp.WebpOptions | sharp.AvifOptions | sharp.HeifOptions | sharp.JxlOptions | sharp.GifOptions | sharp.Jp2Options | sharp.TiffOptions;
+    compressOptions:
+        | sharp.OutputOptions
+        | sharp.JpegOptions
+        | sharp.PngOptions
+        | sharp.WebpOptions
+        | sharp.AvifOptions
+        | sharp.HeifOptions
+        | sharp.JxlOptions
+        | sharp.GifOptions
+        | sharp.Jp2Options
+        | sharp.TiffOptions;
 
     linkWhiteList: string[];
     misskeyInstance: string;

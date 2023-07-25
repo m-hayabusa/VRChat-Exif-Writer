@@ -1,12 +1,12 @@
-import * as fs from 'fs';
-import { config } from './config';
-import path from 'path';
+import * as fs from "fs";
+import { config } from "./config";
+import path from "path";
 
 type DriveFolder = {
-    id: string,
-    createdAt: string,
-    name: string,
-    parentId?: string
+    id: string;
+    createdAt: string;
+    name: string;
+    parentId?: string;
 };
 
 class Misskey {
@@ -15,54 +15,60 @@ class Misskey {
             body.i = config.misskeyToken;
 
             fetch(config.misskeyInstance + "/api/" + endpoint, {
-                "headers": {
-                    "Content-Type": "application/json"
+                headers: {
+                    "Content-Type": "application/json",
                 },
-                "body": JSON.stringify(body),
-                "method": "POST",
+                body: JSON.stringify(body),
+                method: "POST",
             })
-                .then(async r => await r.json())
-                .then(body => {
+                .then(async (r) => await r.json())
+                .then((body) => {
                     if (body["error"] != undefined) {
-                        throw new Error(JSON.stringify(body))
+                        throw new Error(JSON.stringify(body));
                     }
                     res(body);
-                })
+                });
         });
     }
 
     private async createDir(name: string, parent?: string): Promise<DriveFolder> {
         return new Promise((res, rej) => {
-            (this.query("drive/folders/create", {
-                "name": name,
-                "parentId": parent
-            }) as Promise<DriveFolder>)
-                .then(body => res(body))
-                .catch(e => rej(e));
+            (
+                this.query("drive/folders/create", {
+                    name: name,
+                    parentId: parent,
+                }) as Promise<DriveFolder>
+            )
+                .then((body) => res(body))
+                .catch((e) => rej(e));
         });
     }
 
     private async findDir(name: string, parent?: string): Promise<DriveFolder[]> {
         return new Promise((res, rej) => {
-            (this.query("drive/folders/find", {
-                "name": name,
-                "parentId": parent
-            }) as Promise<DriveFolder[]>)
-                .then(b => res(b))
-                .catch(e => rej(e));
-        })
+            (
+                this.query("drive/folders/find", {
+                    name: name,
+                    parentId: parent,
+                }) as Promise<DriveFolder[]>
+            )
+                .then((b) => res(b))
+                .catch((e) => rej(e));
+        });
     }
 
     private async ensureDir(name: string, parent?: string): Promise<DriveFolder> {
         return new Promise((res, rej) => {
-            this.findDir(name, parent).then(async b => {
-                if (b.length <= 0) {
-                    res(await this.createDir(name, parent));
-                } else {
-                    res(b[0]);
-                }
-            }).catch(e => rej(e));
-        })
+            this.findDir(name, parent)
+                .then(async (b) => {
+                    if (b.length <= 0) {
+                        res(await this.createDir(name, parent));
+                    } else {
+                        res(b[0]);
+                    }
+                })
+                .catch((e) => rej(e));
+        });
     }
 
     private async uploadFile(file: string, description: string, folderId: string): Promise<void> {
@@ -76,8 +82,8 @@ class Misskey {
 
             fetch(`${config.misskeyInstance}/api/drive/files/create`, {
                 method: "POST",
-                body: body
-            }).then(r => res())
+                body: body,
+            }).then((r) => res());
         });
     }
 
