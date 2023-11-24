@@ -1,3 +1,5 @@
+https://github.com/m-hayabusa/VRCImageHelper を使ってください (VRChat-Exif-Writerは廃止予定)
+
 # VRChat-Exif-Writer
 
 VRChatのキャプチャ画像にEXIFタグで
